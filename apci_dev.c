@@ -1284,7 +1284,7 @@ apci_class_dev_register(struct apci_my_info *ddata)
 
 irqreturn_t apci_interrupt(int irq, void *dev_id)
 {
-  printk("paras I am here theta\n");
+  //printk("paras I am here theta\n");
    apci_devel("I am in ISR\n");
 
   struct apci_my_info *ddata;
@@ -1371,7 +1371,7 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
 
   apci_devel("ISR called.\n");
 
-  printk("paras I am here 4\n");
+  //printk("paras I am here 4\n");
 
   /* Handle interrupt based on the device ID for the board. */
   switch (ddata->dev_id)
@@ -1461,7 +1461,7 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
     case P104_DIO_48S: /* unknown at this time 6-FEB-2007 */
       break;
 
-    printk("paras I am here 3\n");
+    //printk("paras I am here 3\n");
     case MPCIE_IDIO_8:
     case MPCIE_IIRO_8:
     case MPCIE_IDIO_4:
@@ -1483,7 +1483,7 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
       outl(dword, ddata->regions[2].start + 0x8);
       break;
 
-    printk("paras I am here 0\n");
+    //printk("paras I am here 0\n");
     case mPCIe_AIO16_16F_proto:
     case mPCIe_AIO16_16A_proto:
     case mPCIe_AIO16_16E_proto:
@@ -1637,7 +1637,7 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
         iowrite32(4, ddata->regions[0].mapped_address + 12 + 0x10);
         udelay(5); // ?
 
-        printk("paras I am here 2\n");
+        //printk("paras I am here 2\n");
         apci_debug("Here 5\n");
         //apci_debug("paras--> apci <<--0x%x\n", ioread32(ddata->regions[0].mapped_address +4+ 0x10));
         //apci_debug("paras--> apci <<--0x%x\n", ioread32(ddata->regions[0].mapped_address +8+ 0x10));
