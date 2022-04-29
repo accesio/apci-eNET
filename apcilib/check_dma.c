@@ -25,7 +25,7 @@
 #define BAR_REGISTER 1
 // Note: This is the overall sample rate, sample rate of each channel is SAMPLE_RATE / CHANNEL_COUNT
 //#define SAMPLE_RATE 1000000.0 /* Hz */
-#define SAMPLE_RATE 1000.0 /* Hz */
+#define SAMPLE_RATE 10000.0 /* Hz */
 
 #define LOG_FILE_NAME "samples.csv"
 #define SECONDS_TO_LOG 40.0
@@ -329,11 +329,11 @@ int main (void)
 	pthread_create(&worker_thread, NULL, &worker_main, NULL);
 
 	//reset everything
-	printf("Reset done\n");
 
 	apci_write8(fd, 1,BAR_REGISTER, RESETOFFSET, 0x1);
-
 	sleep(5);
+	printf("Reset done\n");
+
 
 	//set depth of FIFO to generate IRQ
 	apci_write32(fd, 1, BAR_REGISTER, FAFIRQTHRESHOLDOFFSET, FIFO_SIZE);
