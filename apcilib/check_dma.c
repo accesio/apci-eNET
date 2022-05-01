@@ -25,7 +25,7 @@
 #define BAR_REGISTER 1
 // Note: This is the overall sample rate, sample rate of each channel is SAMPLE_RATE / CHANNEL_COUNT
 //#define SAMPLE_RATE 1000000.0 /* Hz */
-#define SAMPLE_RATE 50000.0 /* Hz */
+#define SAMPLE_RATE 1000000.0 /* Hz */
 
 #define LOG_FILE_NAME "samples.csv"
 #define SECONDS_TO_LOG 40.0
@@ -57,7 +57,7 @@ uint8_t CHANNEL_COUNT = 16;             /* For single ended inputs, maximum CHAN
 
 /* This simple sample uses a Ring-buffer to queue data for logging to disk via a background thread */
 /* It is possible for the driver and the user to have a different number of slots, but making them match is less complicated */
-#define RING_BUFFER_SLOTS 4 // paras
+#define RING_BUFFER_SLOTS 8 // paras
 static uint32_t ring_buffer[RING_BUFFER_SLOTS][SAMPLES_PER_TRANSFER];
 static sem_t ring_sem;
 volatile static int terminate;
@@ -127,7 +127,7 @@ void * log_main(void *arg)
 		int buffers_queued;
 		sem_getvalue(&ring_sem, &buffers_queued);
 		if (terminate == 1 && buffers_queued == 0) break;
-                printf (" terminate = %d buffers_queued = %d\n", terminate, buffers_queued);
+                //printf (" terminate = %d buffers_queued = %d\n", terminate, buffers_queued);
                 status = sem_wait(&ring_sem);
                 if (terminate == 2) break;
 
@@ -150,7 +150,7 @@ void * log_main(void *arg)
 		    fprintf(out, "\n");
 		}
                 ring_read_index++;
-		printf("Ring_read_index = %d\n",ring_read_index );
+		//printf("Ring_read_index = %d\n",ring_read_index );
                 ring_read_index %= RING_BUFFER_SLOTS;
          };
 	 fflush(out);
@@ -246,7 +246,7 @@ void * worker_main(void *arg)
 			break;
 		}
 		transfer_count += num_slots;
-		if (1) printf("  Worker Thread: transfer count == %d / %d\n", transfer_count, NUMBER_OF_DMA_TRANSFERS);
+		if (!(transfer_count % 1000)) printf("  Worker Thread: transfer count == %d / %d\n", transfer_count, NUMBER_OF_DMA_TRANSFERS);
 	}while (transfer_count < NUMBER_OF_DMA_TRANSFERS);
 	printf("  Worker Thread: exiting; data acquisition complete.\n");
 	terminate = 1;

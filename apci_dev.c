@@ -496,13 +496,16 @@ apci_class_dev_register(struct apci_my_info *ddata)
 irqreturn_t apci_interrupt(int irq, void *dev_id)
 {
   //printk("paras I am here theta\n");
-   apci_devel("I am in ISR\n");
 
   struct apci_my_info *ddata;
   __u8 byte;
-  __u32 dword;
+  //__u32 dword;
   bool notify_user = true;
   uint32_t irq_event = 0;
+
+   printk("%s << ", __FUNCTION__);
+//   udelay(100);
+
 
   ddata = (struct apci_my_info *)dev_id;
   switch (ddata->dev_id)
@@ -522,6 +525,7 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
 
       if ((byte & 4) == 0)
       {
+        printk("%s NOT ME!\n", __FUNCTION__);
         return IRQ_NONE; /* not me */
       }
     }
@@ -538,6 +542,7 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
 
       if ((byte & 0x80) == 0)
       {
+        printk("%s NOT ME!\n", __FUNCTION__);
         return IRQ_NONE; /* not me */
       }
     }
@@ -555,7 +560,7 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
 
       if ((irq_event & 0x0000000F) == 0)
       {
-        apci_devel("ISR: not our IRQ\n");
+        printk("%s NOT ME!\n", __FUNCTION__);
         return IRQ_NONE;
       }
 
@@ -630,6 +635,7 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
     }
   }
   apci_devel("ISR: IRQ Handled\n");
+  //udelay(10);
   return IRQ_HANDLED;
 }
 
