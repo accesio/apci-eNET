@@ -25,7 +25,7 @@
 #define BAR_REGISTER 1
 // Note: This is the overall sample rate, sample rate of each channel is SAMPLE_RATE / CHANNEL_COUNT
 //#define SAMPLE_RATE 1000000.0 /* Hz */
-#define SAMPLE_RATE 1000.0 /* Hz */
+#define SAMPLE_RATE 50000.0 /* Hz */
 
 #define LOG_FILE_NAME "samples.csv"
 #define SECONDS_TO_LOG 40.0
@@ -122,7 +122,7 @@ void * log_main(void *arg)
 		exit(1);
 	}
         while (1)
-        {       printf("Enter logger thread while loop\n");
+        {       //printf("Enter logger thread while loop\n");
 		// Output is Ch 0, Ch 8, Ch 1, Ch 9, ....
 		int buffers_queued;
 		sem_getvalue(&ring_sem, &buffers_queued);
@@ -134,7 +134,7 @@ void * log_main(void *arg)
                 for (int ii = 0; ii < SAMPLES_PER_TRANSFER; ii+=NUM_CHANNELS)
                 {
 		    ++samples;
-		    printf("Enter logger thread for loop\n");
+		    //printf("Enter logger thread for loop\n");
 		    for (int jj = 0; jj < NUM_CHANNELS; ++jj)
 		    {
                         //(ring_buffer[ring_read_index][ii+jj] >> 20) & 0xF, // RAWchannelshift
@@ -143,7 +143,7 @@ void * log_main(void *arg)
 
 		        int16_t dval = ring_buffer[ring_read_index][ii+jj] & 0xFFFF;
 			//fprintf(out, "%d,", dval);
-			fprintf(stdout, "%d,", dval); //paras_print
+			//fprintf(stdout, "%d,", dval); //paras_print
 			//int16_t chan = (ring_buffer[ring_read_index][ii+jj] >> 20) & 0xF;
 			//fprintf(out, "%d,%d,", chan, dval);
 		    }
@@ -232,7 +232,7 @@ void * worker_main(void *arg)
 
 		__sync_synchronize();
 
-		if (1) printf("  Worker Thread: Telling driver we've taken %d buffer%c\n", num_slots, (num_slots == 1) ? ' ':'s');
+		if (0) printf("  Worker Thread: Telling driver we've taken %d buffer%c\n", num_slots, (num_slots == 1) ? ' ':'s');
 		apci_dma_data_done(fd, 1, num_slots);
 
 		for (int i = 0; i < num_slots; i++)
