@@ -25,7 +25,7 @@
 #define BAR_REGISTER 1
 // Note: This is the overall sample rate, sample rate of each channel is SAMPLE_RATE / CHANNEL_COUNT
 //#define SAMPLE_RATE 1000000.0 /* Hz */
-#define SAMPLE_RATE 10000.0 /* Hz */
+#define SAMPLE_RATE 1000.0 /* Hz */
 
 #define LOG_FILE_NAME "samples.csv"
 #define SECONDS_TO_LOG 40.0
