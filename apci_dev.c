@@ -503,8 +503,8 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
   bool notify_user = true;
   uint32_t irq_event = 0;
 
-   printk("%s << ", __FUNCTION__);
-//   udelay(100);
+//   printk("%s << ", __FUNCTION__);
+   //udelay(30);
 
 
   ddata = (struct apci_my_info *)dev_id;
@@ -635,7 +635,7 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
     }
   }
   apci_devel("ISR: IRQ Handled\n");
-  //udelay(10);
+  udelay(5);
   return IRQ_HANDLED;
 }
 
