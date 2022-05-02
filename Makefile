@@ -1,7 +1,6 @@
 obj-m += apci.o
-CC		:= aarch64-none-linux-gnu-gcc
-KVERSION        := $(shell uname -r)
-KDIR		:= /usr/src/linux
+CC		?= gcc
+KDIR            ?= /lib/modules/$(shell uname -r)/build
 
 apci-objs :=      \
     apci_fops.o   \
