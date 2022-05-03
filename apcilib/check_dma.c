@@ -57,7 +57,7 @@ uint8_t CHANNEL_COUNT = 16;             /* For single ended inputs, maximum CHAN
 
 /* This simple sample uses a Ring-buffer to queue data for logging to disk via a background thread */
 /* It is possible for the driver and the user to have a different number of slots, but making them match is less complicated */
-#define RING_BUFFER_SLOTS 8 // paras
+#define RING_BUFFER_SLOTS 16
 static uint32_t ring_buffer[RING_BUFFER_SLOTS][SAMPLES_PER_TRANSFER];
 static sem_t ring_sem;
 volatile static int terminate;
@@ -113,7 +113,7 @@ void * log_main(void *arg)
 	int last_channel = -1;
 	int16_t counts[NUM_CHANNELS];
 	int channel;
-	FILE *out = fopen(LOG_FILE_NAME, "w");
+	FILE *out = fopen(LOG_FILE_NAME, "wb");
 
 	if (out == NULL)
 	{
@@ -131,24 +131,27 @@ void * log_main(void *arg)
                 status = sem_wait(&ring_sem);
                 if (terminate == 2) break;
 
-                for (int ii = 0; ii < SAMPLES_PER_TRANSFER; ii+=NUM_CHANNELS)
-                {
-		    ++samples;
-		    //printf("Enter logger thread for loop\n");
-		    for (int jj = 0; jj < NUM_CHANNELS; ++jj)
-		    {
-                        //(ring_buffer[ring_read_index][ii+jj] >> 20) & 0xF, // RAWchannelshift
-                        //(ring_buffer[ring_read_index][ii+jj] >> 19) & 0xF, // RAWdiffshift
-                        //(ring_buffer[ring_read_index][ii+jj] >> 16) & 0x7, // RAWgainshift
+		fwrite(ring_buffer[ring_read_index], sizeof(uint32_t), SAMPLES_PER_TRANSFER, out);
 
-		        int16_t dval = ring_buffer[ring_read_index][ii+jj] & 0xFFFF;
-			//fprintf(out, "%d,", dval);
-			//fprintf(stdout, "%d,", dval); //paras_print
-			//int16_t chan = (ring_buffer[ring_read_index][ii+jj] >> 20) & 0xF;
-			//fprintf(out, "%d,%d,", chan, dval);
-		    }
-		    fprintf(out, "\n");
-		}
+//                 for (int ii = 0; ii < SAMPLES_PER_TRANSFER; ii+=NUM_CHANNELS)
+//                 {
+// 		    ++samples;
+// 		    //printf("Enter logger thread for loop\n");
+// 		    for (int jj = 0; jj < NUM_CHANNELS; ++jj)
+// 		    {
+//                         //(ring_buffer[ring_read_index][ii+jj] >> 20) & 0xF, // RAWchannelshift
+//                         //(ring_buffer[ring_read_index][ii+jj] >> 19) & 0xF, // RAWdiffshift
+//                         //(ring_buffer[ring_read_index][ii+jj] >> 16) & 0x7, // RAWgainshift
+
+// 		        int16_t dval = ring_buffer[ring_read_index][ii+jj] & 0xFFFF;
+// 			//fprintf(out, "%d,", dval);
+// //			fwrite(&dval, sizeof(dval), 1, out);
+// 			//fprintf(stdout, "%d,", dval); //paras_print
+// 			//int16_t chan = (ring_buffer[ring_read_index][ii+jj] >> 20) & 0xF;
+// 			//fprintf(out, "%d,%d,", chan, dval);
+// 		    }
+// 		    //fprintf(out, "\n");
+// 		}
                 ring_read_index++;
 		//printf("Ring_read_index = %d\n",ring_read_index );
                 ring_read_index %= RING_BUFFER_SLOTS;
