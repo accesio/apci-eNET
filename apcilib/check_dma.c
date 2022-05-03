@@ -413,7 +413,7 @@ int main (void)
 
 err_out: //Once a start has been issued to the card we need to tell it to stop before exiting
 	/* put the card back in the power-up state */
-	//apci_write32(fd, 1, BAR_REGISTER, RESETOFFSET, 0x1);
+	apci_write32(fd, 1, BAR_REGISTER, RESETOFFSET, 0x1);
 
 	terminate = 1;
 	sem_post(&ring_sem);
