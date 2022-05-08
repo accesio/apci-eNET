@@ -1,4 +1,4 @@
-all: check check_dma isp-fpga
+all: check_dma isp-fpga
 
 GCC ?= aarch64-none-linux-gnu-gcc
 

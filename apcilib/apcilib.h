@@ -47,3 +47,4 @@ int apci_writebuf16(int fd, unsigned long device_index, int bar, int bar_offset,
 int apci_writebuf32(int fd, unsigned long device_index, int bar, int bar_offset, unsigned int mmap_offset, int length);
 
 int apci_dac_buffer_size (int fd, unsigned long size);
+int apci_start_dma (int fd);
