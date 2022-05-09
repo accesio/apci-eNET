@@ -492,10 +492,12 @@ long  ioctl_apci(struct file *filp, unsigned int cmd, unsigned long arg)
      case apci_start_dma_data:
           apci_debug("Starting DMA");
           iowrite8(0x1, ddata->regions[1].mapped_address + 0x12);
-          udelay(2100); //If this delay is less than 2000 the first block is zeros
+          udelay(2000); //If this delay is less than 2000 the first block is zeros
                          //if it is higher then the first block starts at 0x7fe
 
+          spin_lock(&(ddata->dma_data_lock));
           ddata->dma_last_buffer = 0;
+          spin_unlock(&(ddata->dma_data_lock));
           iowrite32(ddata->dma_addr & 0xffffffff, ddata->regions[0].mapped_address + 0x10);
           iowrite32(ddata->dma_addr >> 32, ddata->regions[0].mapped_address + 4 + 0x10);
           iowrite32(ddata->dma_slot_size, ddata->regions[0].mapped_address + 8 + 0x10);
