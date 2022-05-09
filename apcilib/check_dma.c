@@ -19,12 +19,22 @@
 #define DEVICEPATH "/dev/apci/pcie_adio16_16f_0"
 
 /* the following set of #defines configure what the sample does; feel free to change these */
-#define SAMPLE_RATE 1000000.0 /* Hz. Note: This is the overall sample rate, sample rate of each channel is SAMPLE_RATE / CHANNEL_COUNT */
+#define SAMPLE_RATE 500000.0 /* Hz. Note: This is the overall sample rate, sample rate of each channel is SAMPLE_RATE / CHANNEL_COUNT */
 #define LOG_FILE_NAME "samples.bin"
-#define SECONDS_TO_LOG 10.0
+#define SECONDS_TO_LOG 2.0
 #define START_CHANNEL 0
 #define END_CHANNEL 15
-#define ADC_RANGE (bmSingleEnded | bmAdcRange_b10V) // the sample makes all channels the same range but the device is more flexible
+#define ADC_RANGE (bmSingleEnded | bmAdcRange_u10V)
+//#define ADC_RANGE (bmSingleEnded | bmAdcRange_u5V)
+//#define ADC_RANGE (bmSingleEnded | bmAdcRange_u2V5)
+//#define ADC_RANGE (bmSingleEnded | bmAdcRange_u1V)
+//#define ADC_RANGE (bmSingleEnded | bmAdcRange_b10V)
+//#define ADC_RANGE (bmSingleEnded | bmAdcRange_b5V)
+//#define ADC_RANGE (bmSingleEnded | bmAdcRange_b2V5)
+//#define ADC_RANGE (bmSingleEnded | bmAdcRange_b1V)
+
+
+
 
 /* The rest of this is internal for the sample to use and should not be changed until you understand it all */
 double Hz;
@@ -40,7 +50,7 @@ volatile static int terminate;
 #define DMA_BUFF_SIZE (BYTES_PER_TRANSFER * RING_BUFFER_SLOTS)
 #define NUMBER_OF_DMA_TRANSFERS ((__u32)((AMOUNT_OF_SAMPLES_TO_LOG + SAMPLES_PER_TRANSFER - 1) / SAMPLES_PER_TRANSFER))
 
-int fd;
+int fd = -1;
 pthread_t logger_thread;
 pthread_t worker_thread;
 
@@ -93,7 +103,6 @@ void *log_main(void *arg)
 	fflush(out);
 	fclose(out);
 	printf("Recorded %d samples on %d channels at rate %f\n", samples, NUM_CHANNELS, SAMPLE_RATE);
-	printf("Duration: %f\n", (CHANNEL_COUNT / SAMPLE_RATE) * samples);
 }
 
 /* Background thread to acquire data and queue to logger_thread */
@@ -230,19 +239,23 @@ int main(int argc, char **argv)
 	dma_delay.tv_nsec = 10;
 
 	printf("\nmPCIe-ADIO16-16F Family ADC logging sample.\n");
+	printf("Source Configured to take CH%d to CH%d\nat %f rate\n", START_CHANNEL, END_CHANNEL, rate);
+	printf("Logging raw data to %s\nAll channels gaincode=%01X\n", LOG_FILE_NAME, ADC_RANGE);
 
 	if (argc > 1) // if there's a parameter on the command line assume it is the device-to-operate
 	{
-		devicefile = argv[1];
+		devicefile = strdup(argv[1]);
 		fd = open(devicefile, O_RDONLY);
 		if (fd < 0)
 		{
 			printf("Device file %s could not be opened. Attempting to use default (%s)\n", devicefile, DEVICEPATH);
 		}
 	}
+
 	if (fd < 0) // if the parameter-provided device failed to open or wasn't present try the default
 	{
 		devicefile = strdup(DEVICEPATH);
+		printf("attempting to open default device: %s\n", devicefile);
 		fd = open(devicefile, O_RDONLY);
 		if (fd < 0)
 		{
@@ -250,6 +263,7 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 	}
+	printf("Using device file %s\n", devicefile);
 
 	sigIntHandler.sa_handler = abort_handler;
 	sigemptyset(&sigIntHandler.sa_mask);
@@ -257,13 +271,10 @@ int main(int argc, char **argv)
 	sigaction(SIGINT, &sigIntHandler, NULL);
 	sigaction(SIGABRT, &sigIntHandler, NULL);
 
-	// Setup dma ring buffer in driver
 	status = apci_dma_transfer_size(fd, 1, RING_BUFFER_SLOTS, BYTES_PER_TRANSFER);
-	printf("Setting bytes per transfer: 0x%x\n", BYTES_PER_TRANSFER);
-
 	if (status)
 	{
-		printf("Error setting transfer_size\n");
+		printf("Error setting apci_dma_transfer_size=%d\n", status);
 		return -1;
 	}
 
@@ -279,16 +290,24 @@ int main(int argc, char **argv)
 
 	apci_write32(fd, 1, BAR_REGISTER, ofsAdcFifoIrqThreshold, FIFO_SIZE);
 	apci_read32(fd, 1, BAR_REGISTER, ofsAdcFifoIrqThreshold, &depth_readback);
+	printf("FAF IRQ Threshold readback from +%02X was %d\n", ofsAdcFifoIrqThreshold, depth_readback);
+
 	apci_write32(fd, 1, BAR_REGISTER, ofsIrqEnables, bmIrqDmaDone | bmIrqFifoAlmostFull);
 	SetAdcStartRate(fd, &rate);
 
 	for (int channel = START_CHANNEL; channel <= END_CHANNEL; channel++)
-		apci_write8(fd, 1, BAR_REGISTER, ofsAdcRange + channel, bmAdcRange_b10V);
+		apci_write8(fd, 1, BAR_REGISTER, ofsAdcRange + channel, ADC_RANGE);
 
 	apci_write8(fd, 1, BAR_REGISTER, ofsAdcStartChannel, START_CHANNEL);
 	apci_write8(fd, 1, BAR_REGISTER, ofsAdcStopChannel, END_CHANNEL);
-	apci_write8(fd, 1, BAR_REGISTER, ofsAdcTriggerOptions, bmAdcTriggerTimer);
 
+	// int detectedMux;
+	// apci_read32(fd, 1, BAR_REGISTER, 0xA4, &detectedMux);
+	// printf("\nread +A4 == %02X\n", detectedMux);
+	apci_write32(fd, 1, BAR_REGISTER, ofsSubMuxSelect, bmNoSubMux);
+
+	// since Rate and Trigger are configured already, this will start taking data
+	apci_write8(fd, 1, BAR_REGISTER, ofsAdcTriggerOptions, bmAdcTriggerTimer);
 
 	do
 	{
