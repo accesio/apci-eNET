@@ -162,8 +162,7 @@ void *worker_main(void *arg)
 		if (first_slot + num_slots <= RING_BUFFER_SLOTS)
 		{
 			// printf("  Worker Thread: Copying contiguous buffers from ring\n");
-			memcpy(ring_buffer[first_slot], mmap_addr + (BYTES_PER_TRANSFER * first_slot), BYTES_PER_TRANSFER * num_slots);
-			// memcpy(ring_buffer[0], mmap_addr + (BYTES_PER_TRANSFER * 0), BYTES_PER_TRANSFER * 1);
+			memcpy(ring_buffer[first_slot], mmap_addr + (BYTES_PER_TRANSFER * first_slot), BYTES_PER_TRANSFER * num_slots);			
 		}
 		else
 		{
@@ -212,7 +211,7 @@ void SetAdcStartRate(int fd, double *Hz)
 
 	apci_write32(fd, 1, BAR_REGISTER, ofsAdcRateDivisor, divisor);
 	apci_read32(fd, 1, BAR_REGISTER, ofsAdcRateDivisor, &divisor_readback);
-	printf("  Target ADC Rate is %f\n  Actual rate will be %f (%d/%d)\n", targetHz, *Hz, base_clock, divisor_readback);
+	printf("  Target ADC Rate is %f\n  Actual rate will be %f (%d÷%d)\n", targetHz, *Hz, base_clock, divisor_readback);
 }
 
 /* eNET-AIO16-16F Family:  ADC Data Acquisition sample
@@ -238,7 +237,7 @@ int main(int argc, char **argv)
 	terminate = 0;
 	dma_delay.tv_nsec = 10;
 
-	printf("\nmPCIe-ADIO16-16F Family ADC logging sample.\n");
+	printf("\neNET-AIO16-16F Family ADC logging sample.\n");
 	printf("Source Configured to take CH%d to CH%d\nat %f rate\n", START_CHANNEL, END_CHANNEL, rate);
 	printf("Logging raw data to %s\nAll channels gaincode=%01X\n", LOG_FILE_NAME, ADC_RANGE);
 
