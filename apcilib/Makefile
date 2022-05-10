@@ -1,7 +1,9 @@
-all: check check_dma isp-fpga
+all: logAdcData check check_dma isp-fpga
 
 GCC ?= aarch64-none-linux-gnu-gcc
 
+logAdcData: logAdcData.c apcilib.h apcilib.c
+	$(GCC) -o logAdcData logAdcData.c apcilib.c -lm -lpthread -lncurses -lmenu -O3
 
 check: check.c apcilib.h apcilib.c
 	$(GCC) -o check check.c apcilib.c -lm -lpthread -O3
