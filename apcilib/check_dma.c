@@ -19,7 +19,7 @@
 #define DEVICEPATH "/dev/apci/pcie_adio16_16f_0"
 
 /* the following set of #defines configure what the sample does; feel free to change these */
-#define SAMPLE_RATE 1000000.0 /* Hz. Note: This is the overall sample rate, sample rate of each channel is SAMPLE_RATE / CHANNEL_COUNT */
+#define SAMPLE_RATE 500000.0 /* Hz. Note: This is the overall sample rate, sample rate of each channel is SAMPLE_RATE / CHANNEL_COUNT */
 #define LOG_FILE_NAME "samples.bin"
 #define SECONDS_TO_LOG 5.0
 #define START_CHANNEL 0
@@ -161,7 +161,6 @@ void *worker_main(void *arg)
 		{
 			// printf("  Worker Thread: Copying contiguous buffers from ring\n");
 			memcpy(ring_buffer[first_slot], mmap_addr + (BYTES_PER_TRANSFER * first_slot), BYTES_PER_TRANSFER * num_slots);
-			// memcpy(ring_buffer[0], mmap_addr + (BYTES_PER_TRANSFER * 0), BYTES_PER_TRANSFER * 1);
 		}
 		else
 		{
@@ -210,7 +209,7 @@ void SetAdcStartRate(int fd, double *Hz)
 
 	apci_write32(fd, 1, BAR_REGISTER, ofsAdcRateDivisor, divisor);
 	apci_read32(fd, 1, BAR_REGISTER, ofsAdcRateDivisor, &divisor_readback);
-	printf("  Target ADC Rate is %f\n  Actual rate will be %f (%d/%d)\n", targetHz, *Hz, base_clock, divisor_readback);
+	printf("  Target ADC Rate is %f\n  Actual rate will be %f (%d÷%d)\n", targetHz, *Hz, base_clock, divisor_readback);
 }
 
 /* eNET-AIO16-16F Family:  ADC Data Acquisition sample
@@ -236,8 +235,8 @@ int main(int argc, char **argv)
 	terminate = 0;
 	dma_delay.tv_nsec = 10;
 
-	printf("\nmPCIe-ADIO16-16F Family ADC logging sample.\n");
-	printf("Source Configured to take CH%d to CH%d\nat %f rate\n",START_CHANNEL, END_CHANNEL, rate);
+	printf("\neNET-AIO16-16F Family ADC logging sample.\n");
+	printf("Source Configured to take CH%d to CH%d\nat %f rate\n", START_CHANNEL, END_CHANNEL, rate);
 	printf("Logging raw data to %s\nAll channels gaincode=%01X\n", LOG_FILE_NAME, ADC_RANGE);
 
 	if (argc > 1) // if there's a parameter on the command line assume it is the device-to-operate

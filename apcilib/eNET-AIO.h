@@ -9,12 +9,17 @@
 #define AdcBaseClock 10000000
 
 /* Hardware registers */
+<<<<<<< HEAD
 #define ofsReset                0x00
+=======
+#define ofsReset				0x00
+>>>>>>> 3bec6ce6c1533eff039c95dece57a0268f41245b
     #define bmResetEverything       (1 << 0)
     #define bmResetAdc              (1 << 1)
     #define bmResetDac              (1 << 2)
     #define bmResetDio              (1 << 3)
 
+<<<<<<< HEAD
 #define ofsAdcRange             0x01 /* per-channel-group range is ofsAdcRange + channel group */
     #define bmGainX2                (1 << 1)
     #define bmGainX5                (1 << 2)
@@ -32,6 +37,25 @@
     #define bmAdcRange_b1V          (bmGainX2|bmGainX5|bmBipolar)
 
 #define ofsAdcCalibrationMode   0x11
+=======
+#define ofsAdcRange 			0x01 /* per-channel-group range is ofsAdcRange + channel group */
+    #define bmGainX2                (1 << 1)
+    #define bmGainX5                (1 << 2)
+    #define bmBipolar               (1 << 0) 
+    #define bmUnipolar              (0 << 0)
+    #define bmSingleEnded           (1 << 3)
+    #define bmDifferential          (0 << 3)
+    #define bmAdcRange_b1V          (bmGainX2|bmGainX5|bmBipolar)
+    #define bmAdcRange_b2V5         (bmGainX5|bmBipolar)
+    #define bmAdcRange_b5V          (bmGainX2|bmBipolar)
+    #define bmAdcRange_b10V         (bmBipolar)
+    #define bmAdcRange_u1V          (bmGainX2|bmGainX5|bmUnipolar)
+    #define bmAdcRange_u2V5         (bmGainX5|bmUnipolar)
+    #define bmAdcRange_u5V          (bmGainX2|bmUnipolar)
+    #define bmAdcRange_u10V         (bmUnipolar)
+
+#define ofsAdcCalibrationMode   0x11    
+>>>>>>> 3bec6ce6c1533eff039c95dece57a0268f41245b
     #define bmCalibrationOff        (0 << 0)
     #define bmCalibrationOn         (1 << 0)
     #define bmCalibrateVRef         (1 << 1)
@@ -56,26 +80,46 @@
     #define bmAdcCrossTalk400k      (1 << 0)
     #define bmAdcCrossTalk500k      (0 << 0)
 
+<<<<<<< HEAD
 #define ofsAdcRateDivisor       0x18
+=======
+#define ofsAdcRateDivisor    	0x18
+>>>>>>> 3bec6ce6c1533eff039c95dece57a0268f41245b
 #define ofsAdcDataFifo          0x1C
     #define bmAdcDataInvalid        (1 << 31)
     #define bmAdcDataChannelMask    (0x7F << 20)
     #define bmAdcDataGainMask       (0xF << 27)
+<<<<<<< HEAD
     #define bmAdcDataMask           (0xFFFF)
 
 #define ofsAdcFifoIrqThreshold  0x20
 #define ofsAdcFifoCount         0x24
 #define ofsIrqEnables           0x28
+=======
+    #define bmAdcDataMask           (0xFFFF)  
+
+#define ofsAdcFifoIrqThreshold  0x20
+#define ofsAdcFifoCount         0x24
+#define ofsIrqEnables			0x28
+>>>>>>> 3bec6ce6c1533eff039c95dece57a0268f41245b
     #define bmIrqDmaDone            (1 << 0)
     #define bmIrqFifoAlmostFull     (1 << 1)
     #define bmIrqEvent              (1 << 3)
 
+<<<<<<< HEAD
 #define ofsIrqStatus_Clear      0x2C
+=======
+#define ofsIrqStatus_Clear		0x2C
+>>>>>>> 3bec6ce6c1533eff039c95dece57a0268f41245b
 //  #define bmIrqDmaDone            (1 << 0)
 //  #define bmIrqFifoAlmostFull     (1 << 1)
 //  #define bmIrqEvent              (1 << 3)
 
+<<<<<<< HEAD
 #define ofsDac                  0x30
+=======
+#define ofsDac		    		0x30
+>>>>>>> 3bec6ce6c1533eff039c95dece57a0268f41245b
 #define ofsDacSleep             0x34
 #define ofsDioDirections        0x3C
     #define bmDioInput              (1) // bit 0 is DIO#0, 1 is DIO#1 etc
