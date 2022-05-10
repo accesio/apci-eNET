@@ -156,7 +156,7 @@ int main(int argc, char **argv)
 	uint32_t Version = 0;
 	apci_read32(apci, 1, BAR_REGISTER, ofsFPGARevision, &Version);
 
-	printf("\nACCES ISP-FPGA Engineering Utility for Linux [FPGA Rev %08X]\n", Version);
+	printf("\nACCES ISP-FPGA Engineering Utility for Linux [current FPGA Rev %08X]\n", Version);
 
 	ReadFile(argv[2], FlashData);
 
@@ -186,5 +186,6 @@ int main(int argc, char **argv)
 		/* verify data read from flash */
 	} while (!VerifyFlash());
 
-	printf("Flash Update Successful.  Wrote %s to Device %04x.\n\n", argv[2], DeviceID); // never prints due to CTRL-C abort
+	printf("Flash Update Successful.  Wrote %s to Device %04x.\n\n", argv[2], DeviceID);
+	printf("----COLD REBOOT the eNET-AIO to load the new FPGA from Flash!!----\n")
 }
