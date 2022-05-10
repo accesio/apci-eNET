@@ -587,10 +587,10 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
         spin_unlock(&(ddata->dma_data_lock));
         base += ddata->dma_slot_size * ddata->dma_last_buffer;
 
-        iowrite32(base & 0xffffffff, ddata->regions[0].mapped_address + 0x10);
-        iowrite32(base >> 32, ddata->regions[0].mapped_address + 4 + 0x10);
-        iowrite32(ddata->dma_slot_size, ddata->regions[0].mapped_address + 8 + 0x10);
-        iowrite32(4, ddata->regions[0].mapped_address + 12 + 0x10);
+        iowrite32(base & 0xffffffff, ddata->regions[BAR_DMA].mapped_address + ofsDmaAddr32);
+        iowrite32(base >> 32, ddata->regions[BAR_DMA].mapped_address + ofsDmaAddr64);
+        iowrite32(ddata->dma_slot_size, ddata->regions[BAR_DMA].mapped_address + ofsDmaSize);
+        iowrite32(DmaStart, ddata->regions[BAR_DMA].mapped_address + ofsDmaControl);
         udelay(5); // ?
 
         //printk("paras I am here 2\n");
@@ -602,8 +602,8 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
 
 
       }
-
-      iowrite32(irq_event, ddata->regions[1].mapped_address + 0x2C); // clear whatever IRQ occurred and retain enabled IRQ sources // TODO: Upgrade to doRegisterAction("Clear&Enable")
+      // clear whatever IRQ occurred and retain enabled IRQ sources
+      iowrite32(irq_event, ddata->regions[BAR_REGISTER].mapped_address + ofsIrqStatus_Clear);
       apci_debug("ISR: irq_event = 0x%x, depth = 0x%x, IRQStatus = 0x%x\n", irq_event, ioread32(ddata->regions[1].mapped_address + 0x24), ioread32(ddata->regions[1].mapped_address + 0x2C));
 
 

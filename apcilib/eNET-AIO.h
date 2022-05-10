@@ -18,7 +18,7 @@
 #define ofsAdcRange 			0x01 /* per-channel-group range is ofsAdcRange + channel group */
     #define bmGainX2                (1 << 1)
     #define bmGainX5                (1 << 2)
-    #define bmBipolar               (1 << 0) 
+    #define bmBipolar               (1 << 0)
     #define bmUnipolar              (0 << 0)
     #define bmSingleEnded           (1 << 3)
     #define bmDifferential          (0 << 3)
@@ -31,7 +31,7 @@
     #define bmAdcRange_u5V          (bmGainX2|bmUnipolar)
     #define bmAdcRange_u10V         (bmUnipolar)
 
-#define ofsAdcCalibrationMode   0x11    
+#define ofsAdcCalibrationMode   0x11
     #define bmCalibrationOff        (0 << 0)
     #define bmCalibrationOn         (1 << 0)
     #define bmCalibrateVRef         (1 << 1)
@@ -61,7 +61,7 @@
     #define bmAdcDataInvalid        (1 << 31)
     #define bmAdcDataChannelMask    (0x7F << 20)
     #define bmAdcDataGainMask       (0xF << 27)
-    #define bmAdcDataMask           (0xFFFF)  
+    #define bmAdcDataMask           (0xFFFF)
 
 #define ofsAdcFifoIrqThreshold  0x20
 #define ofsAdcFifoCount         0x24
@@ -100,3 +100,12 @@
 #define ofsAdcCalScale4         0xD8
 #define ofsAdcCalOffset4        0xDC
 
+#define BAR_DMA 0
+
+#define ofsDmaAddr32            0x10
+#define ofsDmaAddr64            0x14
+#define ofsDmaSize              0x18
+#define ofsDmaControl           0x1c
+    #define DmaStart            0x4
+    #define DmaAbortClear       0x8
+    #define DmaEnableSctrGthr   0x10

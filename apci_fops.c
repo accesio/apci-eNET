@@ -491,19 +491,17 @@ long  ioctl_apci(struct file *filp, unsigned int cmd, unsigned long arg)
           break;
      case apci_start_dma_data:
           apci_debug("Starting DMA");
-          iowrite8(0x1, ddata->regions[1].mapped_address + 0x12);
-          udelay(2000); //If this delay is less than 2000 the first block is zeros
-                         //if it is higher then the first block starts at 0x7fe
-
+          iowrite8(bmAdcTriggerTimer, ddata->regions[BAR_REGISTER].mapped_address + ofsAdcTriggerOptions);
+          udelay(2200);
           spin_lock(&(ddata->dma_data_lock));
           ddata->dma_last_buffer = 0;
           spin_unlock(&(ddata->dma_data_lock));
-          iowrite32(ddata->dma_addr & 0xffffffff, ddata->regions[0].mapped_address + 0x10);
-          iowrite32(ddata->dma_addr >> 32, ddata->regions[0].mapped_address + 4 + 0x10);
-          iowrite32(ddata->dma_slot_size, ddata->regions[0].mapped_address + 8 + 0x10);
-          iowrite32(4, ddata->regions[0].mapped_address + 12 + 0x10);
+          iowrite32(ddata->dma_addr & 0xffffffff, ddata->regions[BAR_DMA].mapped_address + ofsDmaAddr32);
+          iowrite32(ddata->dma_addr >> 32, ddata->regions[BAR_DMA].mapped_address + ofsDmaAddr64);
+          iowrite32(ddata->dma_slot_size, ddata->regions[BAR_DMA].mapped_address + ofsDmaSize);
+          iowrite32(DmaStart, ddata->regions[BAR_DMA].mapped_address + ofsDmaControl);
           udelay(5);
-          iowrite32(0x1, ddata->regions[1].mapped_address + 0x28);
+          iowrite32(bmIrqDmaDone, ddata->regions[BAR_REGISTER].mapped_address + ofsIrqEnables);
           apci_debug("DMA started");
 
           break;
