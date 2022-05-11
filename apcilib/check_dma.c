@@ -297,7 +297,7 @@ int main(int argc, char **argv)
 	apci_read32(fd, 1, BAR_REGISTER, ofsAdcFifoIrqThreshold, &depth_readback);
 	printf("FAF IRQ Threshold readback from +%02X was %d\n", ofsAdcFifoIrqThreshold, depth_readback);
 
-	apci_write32(fd, 1, BAR_REGISTER, ofsIrqEnables, bmIrqDmaDone | bmIrqFifoAlmostFull);
+	//apci_write32(fd, 1, BAR_REGISTER, ofsIrqEnables, bmIrqDmaDone);
 	SetAdcStartRate(fd, &rate);
 
 	for (int channel = START_CHANNEL; channel <= END_CHANNEL; channel++)
@@ -313,6 +313,8 @@ int main(int argc, char **argv)
 
 	// since Rate and Trigger are configured already, this will start taking data
 	apci_write8(fd, 1, BAR_REGISTER, ofsAdcTriggerOptions, bmAdcTriggerTimer);
+	apci_start_dma(fd);
+
 
 	do
 	{

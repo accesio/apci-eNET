@@ -489,6 +489,23 @@ long  ioctl_apci(struct file *filp, unsigned int cmd, unsigned long arg)
                ddata->dac_fifo_buffer = kmalloc(arg, GFP_KERNEL);
           }
           break;
+     case apci_start_dma_data:
+          apci_debug("Starting DMA");
+          iowrite8(bmAdcTriggerTimer, ddata->regions[BAR_REGISTER].mapped_address + ofsAdcTriggerOptions);
+          udelay(2200);
+          spin_lock(&(ddata->dma_data_lock));
+          ddata->dma_last_buffer = 0;
+          spin_unlock(&(ddata->dma_data_lock));
+          iowrite32(ddata->dma_addr & 0xffffffff, ddata->regions[BAR_DMA].mapped_address + ofsDmaAddr32);
+          iowrite32(ddata->dma_addr >> 32, ddata->regions[BAR_DMA].mapped_address + ofsDmaAddr64);
+          iowrite32(ddata->dma_slot_size, ddata->regions[BAR_DMA].mapped_address + ofsDmaSize);
+          iowrite32(DmaStart, ddata->regions[BAR_DMA].mapped_address + ofsDmaControl);
+          udelay(5);
+          iowrite32(bmIrqDmaDone, ddata->regions[BAR_REGISTER].mapped_address + ofsIrqEnables);
+          apci_debug("DMA started");
+
+          break;
+
     };
     return 0;
 }

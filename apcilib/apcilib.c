@@ -227,3 +227,8 @@ int apci_dac_buffer_size (int fd, unsigned long size)
 {
 	return ioctl(fd, apci_set_dac_buff_size, size);
 }
+
+int apci_start_dma (int fd)
+{
+	return ioctl(fd, apci_start_dma_data);
+}

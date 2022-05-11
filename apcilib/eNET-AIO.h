@@ -107,3 +107,12 @@
 #define ofsAdcCalScale4         0xD8
 #define ofsAdcCalOffset4        0xDC
 
+#define BAR_DMA 0
+
+#define ofsDmaAddr32            0x10
+#define ofsDmaAddr64            0x14
+#define ofsDmaSize              0x18
+#define ofsDmaControl           0x1c
+    #define DmaStart            0x4
+    #define DmaAbortClear       0x8
+    #define DmaEnableSctrGthr   0x10
