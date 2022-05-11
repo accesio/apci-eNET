@@ -87,7 +87,7 @@ void ShowConfig()
 	char sEndChannel[2];
 	snprintf(sEndChannel, 2, "%X", _AdcEndCh);
 	char sStartRate[12];
-	snprintf(sStartRate, 12, "%9.1f", _AdcStartRate / rateDivisor);
+	snprintf(sStartRate, 12, "%9.1f", _AdcStartRate);
 	mvprintw(4, SHOW_CONFIG_LEFT, "ADC Configuration");
 	mvprintw(5, SHOW_CONFIG_LEFT, "ADC Start Mode: %s", sStartMode);
 	mvprintw(6, SHOW_CONFIG_LEFT, "ADC Start Rate: %s Hz", sStartRate);
@@ -568,14 +568,6 @@ int main(int argc, char **argv)
 
 	timerStart = time(NULL);
 
-	/* The ADC chip needs 3 init-time conversions performed.  This is being added to APCI.ko but for now ... */
-	apci_write8(fd, 1, BAR_REGISTER, ofsAdcSoftwareStart, 0);
-	usleep(1);
-	apci_write8(fd, 1, BAR_REGISTER, ofsAdcSoftwareStart, 0);
-	usleep(1);
-	apci_write8(fd, 1, BAR_REGISTER, ofsAdcSoftwareStart, 0);
-	usleep(1);
-
 	apci_write8(fd, 1, BAR_REGISTER, ofsReset, bmResetEverything);
 	usleep(5);
 
@@ -595,8 +587,9 @@ int main(int argc, char **argv)
 
 	apci_write8(fd, 1, BAR_REGISTER, ofsAdcStartChannel, DEFAULT_START_CHANNEL);
 	apci_write8(fd, 1, BAR_REGISTER, ofsAdcStopChannel, DEFAULT_END_CHANNEL);
-	apci_write8(fd, 1, BAR_REGISTER, ofsAdcTriggerOptions, bmAdcTriggerTimer); // starts taking data
-
+	apci_write8(fd, 1, BAR_REGISTER, ofsAdcTriggerOptions, bmAdcTriggerTimer | _AdcStartMode); // starts taking data
+	apci_start_dma(fd);
+	
 	do
 	{
 		sleep(1);
