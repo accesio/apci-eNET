@@ -44,7 +44,7 @@ static sem_t ring_sem;
 volatile static int terminate;
 
 #define DMA_BUFF_SIZE (BYTES_PER_TRANSFER * RING_BUFFER_SLOTS)
-int NumberOfDmaTransfers = 0;// NUMBER_OF_DMA_TRANSFERS;
+int NumberOfDmaTransfers = 0; // NUMBER_OF_DMA_TRANSFERS;
 
 int fd = -1;
 pthread_t logger_thread;
@@ -58,6 +58,7 @@ const char *stringRanges[] = {"0-10V  ", "bip10V ", "0-5V   ", "bip5V  ",
 int _AdcStartMode = bmAdcTriggerTypeChannel;
 int _AdcStartRateChoice = 0;
 int _AdcRangeChoice[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+double AdcRates_divisors[8] = {1.0, 2.0, 4.0, 10.0, 20.0, 100.0, 1000.0, 10000.0};
 double AdcRates[8] = {1000000.0, 500000.0, 250000.0, 100000.0, 50000.0, 10000.0, 1000.0, 100.0};
 int _AdcStartCh = DEFAULT_START_CHANNEL;
 int _AdcEndCh = DEFAULT_END_CHANNEL;
@@ -66,10 +67,16 @@ char LogFileName[4096];
 int done = 0;
 int bRunLogging = 0;
 
-
 #define SHOW_CONFIG_LEFT 70
 void ShowConfig()
 {
+	double rateDivisor = 1.0;
+	if (_AdcStartMode == bmAdcTriggerTypeScan)
+	{
+		rateDivisor = _AdcEndCh - _AdcStartCh + 1;
+	}
+	_AdcStartRate = AdcRates[_AdcStartRateChoice] / rateDivisor;
+
 	char sRange[16][10];
 	for (int GainGroup = 0; GainGroup < 16; GainGroup++)
 		snprintf(sRange[GainGroup], 9, "%s", stringRanges[_AdcRangeChoice[GainGroup]]);
@@ -80,15 +87,15 @@ void ShowConfig()
 	char sEndChannel[2];
 	snprintf(sEndChannel, 2, "%X", _AdcEndCh);
 	char sStartRate[12];
-	snprintf(sStartRate, 12, "%9.1f", _AdcStartRate);
+	snprintf(sStartRate, 12, "%9.1f", _AdcStartRate / rateDivisor);
 	mvprintw(4, SHOW_CONFIG_LEFT, "ADC Configuration");
 	mvprintw(5, SHOW_CONFIG_LEFT, "ADC Start Mode: %s", sStartMode);
 	mvprintw(6, SHOW_CONFIG_LEFT, "ADC Start Rate: %s Hz", sStartRate);
 	mvprintw(7, SHOW_CONFIG_LEFT, "Acquiring channels %s..%s", sStartChannel, sEndChannel);
 	mvprintw(8, SHOW_CONFIG_LEFT, "Logging %3.2f seconds of data", SECONDS_TO_LOG);
 	for (int GainGroup = 0; GainGroup < 16; GainGroup++)
-		mvprintw(9+GainGroup, SHOW_CONFIG_LEFT, "Range Group %d Range: %s", GainGroup, sRange[GainGroup]);
-	snprintf(LogFileName, 4000, "Log_%1.1fseconds_ch%X..%X_%s_%9.1fHz.bin", SECONDS_TO_LOG, _AdcStartCh, _AdcEndCh, stringRanges[_AdcRangeChoice[0]], _AdcStartRate );
+		mvprintw(9 + GainGroup, SHOW_CONFIG_LEFT, "Range Group %d Range: %s", GainGroup, sRange[GainGroup]);
+	snprintf(LogFileName, 4000, "Log_%1.1fseconds_ch%X..%X_%s_%9.1fHz.bin", SECONDS_TO_LOG, _AdcStartCh, _AdcEndCh, stringRanges[_AdcRangeChoice[0]], _AdcStartRate);
 }
 
 void changeAdcStartChannel(char *unused)
@@ -117,13 +124,12 @@ void changeAdcStartRate(char *unused)
 {
 	_AdcStartRateChoice++;
 	_AdcStartRateChoice %= 8; // limit to a valid range (there are 8 valid ADC ranges)
-	_AdcStartRate = AdcRates[_AdcStartRateChoice];
 }
 
 // TODO: this will be a per-channel submenu, eventually...
 void changeAdcRanges(char *unused)
 {
-	for (int GainGroup =0; GainGroup < 16; ++GainGroup)
+	for (int GainGroup = 0; GainGroup < 16; ++GainGroup)
 	{
 		_AdcRangeChoice[GainGroup]++;
 		_AdcRangeChoice[GainGroup] %= 8;
@@ -155,21 +161,22 @@ const MenuItem TopMenuItems[] = {
 };
 
 void print_in_middle(WINDOW *win, int starty, int startx, int width, char *string, chtype color)
-{	int length, x, y;
+{
+	int length, x, y;
 	float temp;
 
-	if(win == NULL)
+	if (win == NULL)
 		win = stdscr;
 	getyx(win, y, x);
-	if(startx != 0)
+	if (startx != 0)
 		x = startx;
-	if(starty != 0)
+	if (starty != 0)
 		y = starty;
-	if(width == 0)
+	if (width == 0)
 		width = 80;
 
 	length = strlen(string);
-	temp = (width - length)/ 2;
+	temp = (width - length) / 2;
 	x = startx + (int)temp;
 	wattron(win, color);
 	mvwprintw(win, y, x, "%s", string);
@@ -186,7 +193,6 @@ int HandleMenu()
 	ITEM *cur_item;
 	WINDOW *my_menu_win;
 
-
 	cbreak();
 	noecho();
 	keypad(stdscr, TRUE);
@@ -200,7 +206,7 @@ int HandleMenu()
 		set_item_userptr(my_items[i], TopMenuItems[i].function);
 	}
 	my_menu = new_menu((ITEM **)my_items);
-	menu_opts_off(my_menu, O_SHOWDESC );
+	menu_opts_off(my_menu, O_SHOWDESC);
 	/* Create the window to be associated with the menu */
 	my_menu_win = newwin(10, 50, 4, 4);
 	keypad(my_menu_win, TRUE);
@@ -238,16 +244,16 @@ int HandleMenu()
 			menu_driver(my_menu, REQ_UP_ITEM);
 			break;
 		case 10: /* Enter */
-			{
-				ITEM *cur;
-				void (*p)(char *);
+		{
+			ITEM *cur;
+			void (*p)(char *);
 
-				cur = current_item(my_menu);
-				p = item_userptr(cur);
-				p((char *)item_name(cur));
-				pos_menu_cursor(my_menu);
-				break;
-			}
+			cur = current_item(my_menu);
+			p = item_userptr(cur);
+			p((char *)item_name(cur));
+			pos_menu_cursor(my_menu);
+			break;
+		}
 		default:
 			menu_driver(my_menu, c);
 			menu_driver(my_menu, REQ_CLEAR_PATTERN);
@@ -494,7 +500,6 @@ int main(int argc, char **argv)
 
 	HandleMenu();
 
-
 	txtPuts("\n");
 
 	if (!bRunLogging)
@@ -504,7 +509,7 @@ int main(int argc, char **argv)
 	}
 
 	SamplesToLog = (SECONDS_TO_LOG * _AdcStartRate);
- 	NumberOfDmaTransfers = ((__u32)((SamplesToLog + SAMPLES_PER_TRANSFER - 1) / SAMPLES_PER_TRANSFER));
+	NumberOfDmaTransfers = ((__u32)((SamplesToLog + SAMPLES_PER_TRANSFER - 1) / SAMPLES_PER_TRANSFER));
 
 	int i;
 	volatile void *mmap_addr;
@@ -523,7 +528,6 @@ int main(int argc, char **argv)
 	terminate = 0;
 	dma_delay.tv_nsec = 10;
 
-
 	if (argc > 1) // if there's a parameter on the command line assume it is the device-to-operate
 	{
 		devicefile = strdup(argv[1]);
@@ -537,7 +541,7 @@ int main(int argc, char **argv)
 	if (fd < 0) // if the parameter-provided device failed to open or wasn't present try the default
 	{
 		devicefile = strdup(DEVICEPATH);
-		//txtPuts("attempting to open default device: %s\n", devicefile);
+		// txtPuts("attempting to open default device: %s\n", devicefile);
 		fd = open(devicefile, O_RDONLY);
 		if (fd < 0)
 		{
@@ -580,8 +584,8 @@ int main(int argc, char **argv)
 	txtPuts("FPGA reports Revision = 0x%08X\n", rev);
 
 	apci_write32(fd, 1, BAR_REGISTER, ofsAdcFifoIrqThreshold, FIFO_SIZE);
-	//apci_read32(fd, 1, BAR_REGISTER, ofsAdcFifoIrqThreshold, &depth_readback);
-	//txtPuts("FAF IRQ Threshold readback from +%02X was %d\n", ofsAdcFifoIrqThreshold, depth_readback);
+	// apci_read32(fd, 1, BAR_REGISTER, ofsAdcFifoIrqThreshold, &depth_readback);
+	// txtPuts("FAF IRQ Threshold readback from +%02X was %d\n", ofsAdcFifoIrqThreshold, depth_readback);
 
 	apci_write32(fd, 1, BAR_REGISTER, ofsIrqEnables, bmIrqDmaDone | bmIrqFifoAlmostFull);
 	SetAdcStartRate(fd, &rate);
