@@ -740,19 +740,7 @@ int probe(struct pci_dev *pdev, const struct pci_device_id *id)
       }
     }
 
-    /* switch( id->device ) {  */
-    /* case PCIe_IIRO_8: */
-    /*   apci_debug("Found PCIe_IIRO_8"); */
-    /*   outb( 0x9, ddata->plx_region.start + 0x69 );  */
-    /* default: */
-    /*   apci_debug("Found no device"); */
-    /* } */
-    /* if (ret) { */
-    /*      apci_error("Could not allocate irq."); */
-    /*      goto exit_free; */
-    /* } else { */
     init_waitqueue_head(&(ddata->wait_queue));
-    /* } */
   }
 
   /* add to sysfs */
@@ -777,6 +765,17 @@ int probe(struct pci_dev *pdev, const struct pci_device_id *id)
 
   if (ret)
     goto exit_pci_setdrv;
+
+  //Need to prime the ADC chip with three reads that are ignored
+  //on the eNET device
+  {
+    int i;
+    for (i = 0; i < 3; i++)
+    {
+      iowrite8(0, ddata->regions[BAR_REGISTER].mapped_address + ofsAdcSoftwareStart);
+      udelay(1);
+    }
+  }
 
   apci_debug("Added driver %d\n", dev_counter - 1);
   apci_debug("Value of irq is %d\n", pdev->irq);
