@@ -495,17 +495,10 @@ apci_class_dev_register(struct apci_my_info *ddata)
 
 irqreturn_t apci_interrupt(int irq, void *dev_id)
 {
-  //printk("paras I am here theta\n");
-
   struct apci_my_info *ddata;
   __u8 byte;
-  //__u32 dword;
   bool notify_user = true;
   uint32_t irq_event = 0;
-
-//   printk("%s << ", __FUNCTION__);
-   //udelay(30);
-
 
   ddata = (struct apci_my_info *)dev_id;
   switch (ddata->dev_id)
@@ -550,7 +543,6 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
 
   apci_devel("ISR called.\n");
 
-  //printk("paras I am here 4\n");
     {
       apci_devel("ISR: mPCIe-AxIO irq_event\n");
       // If this is a FIFO near full IRQ then tell the card
@@ -591,15 +583,6 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
         iowrite32(base >> 32, ddata->regions[BAR_DMA].mapped_address + ofsDmaAddr64);
         iowrite32(ddata->dma_slot_size, ddata->regions[BAR_DMA].mapped_address + ofsDmaSize);
         iowrite32(DmaStart, ddata->regions[BAR_DMA].mapped_address + ofsDmaControl);
-        udelay(5); // ?
-
-        //printk("paras I am here 2\n");
-        apci_debug("Here 5\n");
-        //apci_debug("paras--> apci <<--0x%x\n", ioread32(ddata->regions[0].mapped_address +4+ 0x10));
-        //apci_debug("paras--> apci <<--0x%x\n", ioread32(ddata->regions[0].mapped_address +8+ 0x10));
-
-        //apci_debug("paras--> apci <<--0x%x\n", ioread32(ddata->regions[0].mapped_address +12+ 0x10));
-
 
       }
       // clear whatever IRQ occurred and retain enabled IRQ sources
