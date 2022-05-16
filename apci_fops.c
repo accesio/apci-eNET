@@ -491,7 +491,6 @@ long  ioctl_apci(struct file *filp, unsigned int cmd, unsigned long arg)
           break;
      case apci_start_dma_data:
           apci_debug("Starting DMA");
-          iowrite8(bmAdcTriggerTimer, ddata->regions[BAR_REGISTER].mapped_address + ofsAdcTriggerOptions);
 
           spin_lock(&(ddata->dma_data_lock));
           ddata->dma_last_buffer = 0;
