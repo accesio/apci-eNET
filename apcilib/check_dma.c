@@ -110,9 +110,9 @@ void *worker_main(void *arg)
 
 	// map the DMA destination buffer
 	void *mmap_addr = (void *)mmap(NULL, DMA_BUFF_SIZE, PROT_READ, MAP_SHARED, fd, 0);
-	if (mmap_addr == NULL)
+	if (mmap_addr == MAP_FAILED)
 	{
-		printf("  Worker Thread: mmap_addr is NULL\n");
+		printf("  Worker Thread: failed\n");
 		return NULL; // was -1
 	}
 
