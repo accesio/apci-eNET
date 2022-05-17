@@ -569,14 +569,6 @@ int main(int argc, char **argv)
 
 	timerStart = time(NULL);
 
-	/* The ADC chip needs 3 init-time conversions performed.  This is being added to APCI.ko but for now ... */
-	apci_write8(fd, 1, BAR_REGISTER, ofsAdcSoftwareStart, 0);
-	usleep(1);
-	apci_write8(fd, 1, BAR_REGISTER, ofsAdcSoftwareStart, 0);
-	usleep(1);
-	apci_write8(fd, 1, BAR_REGISTER, ofsAdcSoftwareStart, 0);
-	usleep(1);
-
 	apci_write8(fd, 1, BAR_REGISTER, ofsReset, bmResetEverything);
 	usleep(5);
 
