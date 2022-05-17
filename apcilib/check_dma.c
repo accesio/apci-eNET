@@ -19,7 +19,7 @@
 #define DEVICEPATH "/dev/apci/pcie_adio16_16f_0"
 
 /* the following set of #defines configure what the sample does; feel free to change these */
-#define SAMPLE_RATE 500000.0 /* Hz. Note: This is the overall sample rate, sample rate of each channel is SAMPLE_RATE / CHANNEL_COUNT */
+#define SAMPLE_RATE 1000000.0 /* Hz. Note: This is the overall sample rate, sample rate of each channel is SAMPLE_RATE / CHANNEL_COUNT */
 #define LOG_FILE_NAME "samples.bin"
 #define SECONDS_TO_LOG 5.0
 #define START_CHANNEL 0
@@ -40,9 +40,11 @@ uint8_t CHANNEL_COUNT = END_CHANNEL - START_CHANNEL + 1;
 #define NUM_CHANNELS ( CHANNEL_COUNT )
 #define AMOUNT_OF_SAMPLES_TO_LOG (SECONDS_TO_LOG * SAMPLE_RATE)
 
-#define RING_BUFFER_SLOTS 16
+#define RING_BUFFER_SLOTS 8
 static uint32_t ring_buffer[RING_BUFFER_SLOTS][SAMPLES_PER_TRANSFER];
 static sem_t ring_sem;
+static sem_t logger_sem;
+static pthread_mutex_t ring_logger_mutex;
 volatile static int terminate;
 
 #define DMA_BUFF_SIZE (BYTES_PER_TRANSFER * RING_BUFFER_SLOTS)
@@ -93,7 +95,10 @@ void *log_main(void *arg)
 		if (terminate == 2)
 			break;
 
+		pthread_mutex_lock(&ring_logger_mutex);
 		fwrite(ring_buffer[ring_read_index], sizeof(uint32_t), SAMPLES_PER_TRANSFER, out);
+		pthread_mutex_unlock(&ring_logger_mutex);
+		sem_post(&logger_sem);
 
 		ring_read_index++;
 		ring_read_index %= RING_BUFFER_SLOTS;
@@ -117,6 +122,8 @@ void *worker_main(void *arg)
 	}
 
 	status = sem_init(&ring_sem, 0, 0);
+	status |= sem_init(&logger_sem, 0, RING_BUFFER_SLOTS);
+	status |= pthread_mutex_init(&ring_logger_mutex, NULL);
 	if (status)
 	{
 		printf("  Worker Thread: Unable to init semaphore\n");
@@ -157,38 +164,18 @@ void *worker_main(void *arg)
 
 		// printf("  Worker Thread: data [%d slots] in slot %d\n", num_slots, first_slot);
 
-		if (first_slot + num_slots <= RING_BUFFER_SLOTS)
-		{
-			// printf("  Worker Thread: Copying contiguous buffers from ring\n");
-			memcpy(ring_buffer[first_slot], mmap_addr + (BYTES_PER_TRANSFER * first_slot), BYTES_PER_TRANSFER * num_slots);
-		}
-		else
-		{
-			// printf("  Worker Thread: Copying non-contiguous buffers from ring\n");
-			memcpy(ring_buffer[first_slot],
-				   mmap_addr + (BYTES_PER_TRANSFER * first_slot),
-				   BYTES_PER_TRANSFER * (RING_BUFFER_SLOTS - first_slot));
-			memcpy(ring_buffer[0],
-				   mmap_addr,
-				   BYTES_PER_TRANSFER * (num_slots - (RING_BUFFER_SLOTS - first_slot)));
-		}
-
-		__sync_synchronize();
-
-		// printf("  Worker Thread: Telling driver we've taken %d buffer%c\n", num_slots, (num_slots == 1) ? ' ' : 's');
-		apci_dma_data_done(fd, 1, num_slots);
-
 		for (int i = 0; i < num_slots; i++)
 		{
+			sem_wait(&logger_sem);
+			pthread_mutex_lock(&ring_logger_mutex);
+			memcpy(ring_buffer[(first_slot + i) % RING_BUFFER_SLOTS],
+							 mmap_addr + (BYTES_PER_TRANSFER * ((first_slot + i) % RING_BUFFER_SLOTS)),
+							 BYTES_PER_TRANSFER);
+			pthread_mutex_unlock(&ring_logger_mutex);
 			sem_post(&ring_sem);
+			apci_dma_data_done(fd, 1, 1);
 		}
 
-		sem_getvalue(&ring_sem, &buffers_queued);
-		if (buffers_queued >= RING_BUFFER_SLOTS)
-		{
-			printf("  Worker Thread: overran the ring buffer.  Saving the log was too slow. Aborting.\n");
-			break;
-		}
 		transfer_count += num_slots;
 		if (!(transfer_count % 1000))
 			printf("  Worker Thread: transfer count == %d / %d\n", transfer_count, NUMBER_OF_DMA_TRANSFERS);
