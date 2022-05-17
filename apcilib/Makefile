@@ -1,4 +1,4 @@
-all: logAdcData check check_dma isp-fpga
+all: check check_dma isp-fpga logAdcData
 
 GCC ?= aarch64-none-linux-gnu-gcc
 

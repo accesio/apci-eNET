@@ -52,8 +52,8 @@ pthread_t worker_thread;
 void txtPuts(const char *txt, ...);
 void ctxtPuts(chtype color, const char *msg, ...);
 
-const char *stringRanges[] = {"0-10V  ", "bip10V ", "0-5V   ", "bip5V  ",
-							  "0-2V   ", "bip2V  ", "0-1V   ", "bip1V  "};
+const char *stringRanges[] = {"uni_10V", "bip_10V", "uni__5V", "bip__5V",
+							  "uni__2V", "bip__2V", "uni__1V", "bip__1V"};
 
 int _AdcStartMode = bmAdcTriggerTypeChannel;
 int _AdcStartRateChoice = 0;
@@ -87,7 +87,7 @@ void ShowConfig()
 	char sEndChannel[2];
 	snprintf(sEndChannel, 2, "%X", _AdcEndCh);
 	char sStartRate[12];
-	snprintf(sStartRate, 12, "%9.1f", _AdcStartRate / rateDivisor);
+	snprintf(sStartRate, 12, "%9.1f", _AdcStartRate);
 	mvprintw(4, SHOW_CONFIG_LEFT, "ADC Configuration");
 	mvprintw(5, SHOW_CONFIG_LEFT, "ADC Start Mode: %s", sStartMode);
 	mvprintw(6, SHOW_CONFIG_LEFT, "ADC Start Rate: %s Hz", sStartRate);
@@ -95,7 +95,8 @@ void ShowConfig()
 	mvprintw(8, SHOW_CONFIG_LEFT, "Logging %3.2f seconds of data", SECONDS_TO_LOG);
 	for (int GainGroup = 0; GainGroup < 16; GainGroup++)
 		mvprintw(9 + GainGroup, SHOW_CONFIG_LEFT, "Range Group %d Range: %s", GainGroup, sRange[GainGroup]);
-	snprintf(LogFileName, 4000, "Log_%1.1fseconds_ch%X..%X_%s_%9.1fHz.bin", SECONDS_TO_LOG, _AdcStartCh, _AdcEndCh, stringRanges[_AdcRangeChoice[0]], _AdcStartRate);
+	snprintf(LogFileName, 4000, "Log_%1.1fseconds_ch%Xto%X_%s_%1.1fHz.bin", SECONDS_TO_LOG, _AdcStartCh, _AdcEndCh, stringRanges[_AdcRangeChoice[0]], _AdcStartRate);
+	mvprintw(10+16, 1, "Logging to file %s", LogFileName);clrtoeol();
 }
 
 void changeAdcStartChannel(char *unused)
@@ -157,7 +158,7 @@ const MenuItem TopMenuItems[] = {
 	{"4. Change End Channel...", "desc1", changeAdcEndChannel, '4'},
 	{"5. Change Ranges...", "desc1", changeAdcRanges, '5'},
 	{"6. Run this configuration", "desc1", func, '6'},
-	{"ESC Exit", "desc1", func, (char)27},
+	{"ESC Exit (without logging)", "desc1", func, (char)27},
 };
 
 void print_in_middle(WINDOW *win, int starty, int startx, int width, char *string, chtype color)
@@ -208,12 +209,12 @@ int HandleMenu()
 	my_menu = new_menu((ITEM **)my_items);
 	menu_opts_off(my_menu, O_SHOWDESC);
 	/* Create the window to be associated with the menu */
-	my_menu_win = newwin(10, 50, 4, 4);
+	my_menu_win = newwin(14, 50, 4, 4);
 	keypad(my_menu_win, TRUE);
 
 	/* Set main window and sub window */
 	set_menu_win(my_menu, my_menu_win);
-	set_menu_sub(my_menu, derwin(my_menu_win, 6, 48, 3, 1));
+	set_menu_sub(my_menu, derwin(my_menu_win, 7, 48, 3, 1));
 
 	/* Set menu mark to the string " * " */
 	set_menu_mark(my_menu, " * ");
@@ -595,7 +596,8 @@ int main(int argc, char **argv)
 
 	apci_write8(fd, 1, BAR_REGISTER, ofsAdcStartChannel, DEFAULT_START_CHANNEL);
 	apci_write8(fd, 1, BAR_REGISTER, ofsAdcStopChannel, DEFAULT_END_CHANNEL);
-	apci_write8(fd, 1, BAR_REGISTER, ofsAdcTriggerOptions, bmAdcTriggerTimer); // starts taking data
+	apci_write8(fd, 1, BAR_REGISTER, ofsAdcTriggerOptions, bmAdcTriggerTimer | _AdcStartMode); // starts taking data
+	apci_start_dma(fd);
 
 	do
 	{
