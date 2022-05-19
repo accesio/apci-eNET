@@ -495,121 +495,56 @@ apci_class_dev_register(struct apci_my_info *ddata)
 
 irqreturn_t apci_interrupt(int irq, void *dev_id)
 {
-  //printk("paras I am here theta\n");
-
   struct apci_my_info *ddata;
-  __u8 byte;
-  //__u32 dword;
   bool notify_user = true;
   uint32_t irq_event = 0;
 
-//   printk("%s << ", __FUNCTION__);
-   //udelay(30);
-
-
   ddata = (struct apci_my_info *)dev_id;
-  switch (ddata->dev_id)
+
+  // If this is a DMA DONE IRQ then tell the card to write to the next DMA buffer
+  irq_event = ioread32(ddata->regions[1].mapped_address + 0x2C);
+  if ((irq_event & 0x0000000F) == 0)
   {
-    case PCIe_ADIO16_16FDS:
-    case PCIe_ADIO16_16F:
-    break;
+    printk("%s NOT ME!\n", __FUNCTION__);
+    return IRQ_NONE;
+  }
 
-  default:
-    /* The first thing we do is check to see if the card is causing an IRQ.
-     * If it is then we can proceed to clear the IRQ. Otherwise let
-     * Linux know that it wasn't us.
-     */
-    if (!ddata->is_pcie)
+  apci_devel("ISR: mPCIe-AxIO irq_event\n");
+
+  if (irq_event & (0x01)) // DMA DONE IRQ, configure next buffer
+  {
+    dma_addr_t base = ddata->dma_addr;
+    spin_lock(&(ddata->dma_data_lock));
+    if (ddata->dma_first_valid == -1)
     {
-      byte = inb(ddata->plx_region.start + 0x4C);
-
-      if ((byte & 4) == 0)
-      {
-        printk("%s NOT ME!\n", __FUNCTION__);
-        return IRQ_NONE; /* not me */
-      }
+      ddata->dma_first_valid = 0;
     }
-    else
-    { /* PCIe */
-      if (ddata->plx_region.flags & IORESOURCE_IO)
-      {
-        byte = inb(ddata->plx_region.start + 0x69);
-      }
-      else
-      {
-        byte = ioread8(ddata->plx_region.mapped_address + 0x69);
-      }
 
-      if ((byte & 0x80) == 0)
-      {
-        printk("%s NOT ME!\n", __FUNCTION__);
-        return IRQ_NONE; /* not me */
-      }
-    }
-  } // handle 9052 & 8311 "IAm" IRQ Flags
+    ddata->dma_last_buffer++;
+    ddata->dma_last_buffer %= ddata->dma_num_slots;
 
-  apci_devel("ISR called.\n");
-
-  //printk("paras I am here 4\n");
+    if (ddata->dma_last_buffer == ddata->dma_first_valid)
     {
-      apci_devel("ISR: mPCIe-AxIO irq_event\n");
-      // If this is a FIFO near full IRQ then tell the card
-      // to write to the next buffer (and don't notify the user)
-      // else if it is a write done IRQ set last_valid_buffer and notify user
-      irq_event = ioread32(ddata->regions[1].mapped_address + 0x2C); // TODO: Upgrade to doRegisterAction("AmI?")
-
-      if ((irq_event & 0x0000000F) == 0)
-      {
-        printk("%s NOT ME!\n", __FUNCTION__);
-        return IRQ_NONE;
-      }
-
-      if (irq_event & (0x01))
-      {
-        dma_addr_t base = ddata->dma_addr;
-        spin_lock(&(ddata->dma_data_lock));
-        if (ddata->dma_first_valid == -1)
-        {
-          ddata->dma_first_valid = 0;
-        }
-
-        ddata->dma_last_buffer++;
-        ddata->dma_last_buffer %= ddata->dma_num_slots;
-
-        if (ddata->dma_last_buffer == ddata->dma_first_valid)
-        {
-          apci_error("ISR: data discarded");
-          ddata->dma_last_buffer--;
-          if (ddata->dma_last_buffer < 0)
-            ddata->dma_last_buffer = ddata->dma_num_slots - 1;
-          ddata->dma_data_discarded++;
-        }
-        spin_unlock(&(ddata->dma_data_lock));
-        base += ddata->dma_slot_size * ddata->dma_last_buffer;
-
-        iowrite32(base & 0xffffffff, ddata->regions[BAR_DMA].mapped_address + ofsDmaAddr32);
-        iowrite32(base >> 32, ddata->regions[BAR_DMA].mapped_address + ofsDmaAddr64);
-        iowrite32(ddata->dma_slot_size, ddata->regions[BAR_DMA].mapped_address + ofsDmaSize);
-        iowrite32(DmaStart, ddata->regions[BAR_DMA].mapped_address + ofsDmaControl);
-        udelay(5); // ?
-
-        //printk("paras I am here 2\n");
-        apci_debug("Here 5\n");
-        //apci_debug("paras--> apci <<--0x%x\n", ioread32(ddata->regions[0].mapped_address +4+ 0x10));
-        //apci_debug("paras--> apci <<--0x%x\n", ioread32(ddata->regions[0].mapped_address +8+ 0x10));
-
-        //apci_debug("paras--> apci <<--0x%x\n", ioread32(ddata->regions[0].mapped_address +12+ 0x10));
-
-
-      }
-      // clear whatever IRQ occurred and retain enabled IRQ sources
-      iowrite32(irq_event, ddata->regions[BAR_REGISTER].mapped_address + ofsIrqStatus_Clear);
-      apci_debug("ISR: irq_event = 0x%x, depth = 0x%x, IRQStatus = 0x%x\n", irq_event, ioread32(ddata->regions[1].mapped_address + 0x24), ioread32(ddata->regions[1].mapped_address + 0x2C));
-
-
+      apci_error("ISR: data discarded");
+      ddata->dma_last_buffer--;
+      if (ddata->dma_last_buffer < 0)
+        ddata->dma_last_buffer = ddata->dma_num_slots - 1;
+      ddata->dma_data_discarded++;
     }
+    spin_unlock(&(ddata->dma_data_lock));
+    base += ddata->dma_slot_size * ddata->dma_last_buffer;
 
-  /* Check to see if we were actually waiting for an IRQ. If we were
+    iowrite32(base & 0xffffffff, ddata->regions[BAR_DMA].mapped_address + ofsDmaAddr32);
+    iowrite32(base >> 32, ddata->regions[BAR_DMA].mapped_address + ofsDmaAddr64);
+    iowrite32(ddata->dma_slot_size, ddata->regions[BAR_DMA].mapped_address + ofsDmaSize);
+    iowrite32(DmaStart, ddata->regions[BAR_DMA].mapped_address + ofsDmaControl);
+  }
+
+  // clear whatever IRQ occurred and retain enabled IRQ sources
+  iowrite32(irq_event, ddata->regions[BAR_REGISTER].mapped_address + ofsIrqStatus_Clear);
+  apci_debug("ISR: irq_event = 0x%x, depth = 0x%x, IRQStatus = 0x%x\n", irq_event, ioread32(ddata->regions[1].mapped_address + 0x24), ioread32(ddata->regions[1].mapped_address + 0x2C));
+
+  /* Check to see if an application is actually waiting for an IRQ. If yes,
    * then we need to wake the queue associated with this device.
    * Right now it is not possible for any other code sections that access
    * the critical data to interrupt us so we won't disable other IRQs.
@@ -630,7 +565,7 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
     }
   }
   apci_devel("ISR: IRQ Handled\n");
-  udelay(5);
+  udelay(1000);
   return IRQ_HANDLED;
 }
 
