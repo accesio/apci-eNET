@@ -21,7 +21,7 @@
 /* the following set of #defines configure what the sample does; feel free to change these */
 #define SAMPLE_RATE 1000000.0 /* Hz. Note: This is the overall sample rate, sample rate of each channel is SAMPLE_RATE / CHANNEL_COUNT */
 #define LOG_FILE_NAME "samples.bin"
-#define SECONDS_TO_LOG 5.0
+#define SECONDS_TO_LOG 30.0
 #define START_CHANNEL 0
 #define END_CHANNEL 15
 #define ADC_RANGE (bmSingleEnded | bmAdcRange_u10V)
@@ -40,7 +40,7 @@ uint8_t CHANNEL_COUNT = END_CHANNEL - START_CHANNEL + 1;
 #define NUM_CHANNELS ( CHANNEL_COUNT )
 #define AMOUNT_OF_SAMPLES_TO_LOG (SECONDS_TO_LOG * SAMPLE_RATE)
 
-#define RING_BUFFER_SLOTS 8
+#define RING_BUFFER_SLOTS 255
 static uint32_t ring_buffer[RING_BUFFER_SLOTS][SAMPLES_PER_TRANSFER];
 static sem_t ring_sem;
 static sem_t logger_sem;

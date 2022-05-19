@@ -613,7 +613,7 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
     }
   }
   apci_devel("ISR: IRQ Handled\n");
-  udelay(5);
+  udelay(1000);
   return IRQ_HANDLED;
 }
 
