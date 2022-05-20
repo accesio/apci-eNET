@@ -1,7 +1,7 @@
 
 #define BAR_REGISTER 1
 
-#define FIFO_SIZE 0x3FF  /* FIFO Almost Full IRQ Threshold value (0 < FAF <= 0xFFF */
+#define FIFO_SIZE 0x800  /* FIFO Almost Full IRQ Threshold value (0 < FAF <= 0xFFF */
 #define SAMPLES_PER_FIFO_ENTRY   2
 #define BYTES_PER_FIFO_ENTRY     (4 * SAMPLES_PER_FIFO_ENTRY)
 #define BYTES_PER_TRANSFER       (FIFO_SIZE * BYTES_PER_FIFO_ENTRY)
