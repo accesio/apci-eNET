@@ -584,7 +584,7 @@ int main(int argc, char **argv)
 	SetAdcStartRate(fd, &rate);
 
 	for (int channel = DEFAULT_START_CHANNEL; channel <= DEFAULT_END_CHANNEL; channel++)
-		apci_write8(fd, 1, BAR_REGISTER, ofsAdcRange + channel, bmAdcRange_b10V);
+		apci_write8(fd, 1, BAR_REGISTER, ofsAdcRange + channel, _AdcRangeChoice[channel]);
 
 	apci_write8(fd, 1, BAR_REGISTER, ofsAdcStartChannel, DEFAULT_START_CHANNEL);
 	apci_write8(fd, 1, BAR_REGISTER, ofsAdcStopChannel, DEFAULT_END_CHANNEL);
