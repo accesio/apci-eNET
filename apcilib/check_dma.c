@@ -21,14 +21,14 @@
 /* the following set of #defines configure what the sample does; feel free to change these */
 #define SAMPLE_RATE 1000000.0 /* Hz. Note: This is the overall sample rate, sample rate of each channel is SAMPLE_RATE / CHANNEL_COUNT */
 #define LOG_FILE_NAME "samples.bin"
-#define SECONDS_TO_LOG 30.0
+#define SECONDS_TO_LOG 10.0
 #define START_CHANNEL 0
 #define END_CHANNEL 15
-#define ADC_RANGE (bmSingleEnded | bmAdcRange_u10V)
+//#define ADC_RANGE (bmSingleEnded | bmAdcRange_u10V)
 //#define ADC_RANGE (bmSingleEnded | bmAdcRange_u5V)
 //#define ADC_RANGE (bmSingleEnded | bmAdcRange_u2V)
 //#define ADC_RANGE (bmSingleEnded | bmAdcRange_u1V)
-//#define ADC_RANGE (bmSingleEnded | bmAdcRange_b10V)
+#define ADC_RANGE (bmSingleEnded | bmAdcRange_b10V)
 //#define ADC_RANGE (bmSingleEnded | bmAdcRange_b5V)
 //#define ADC_RANGE (bmSingleEnded | bmAdcRange_b2V)
 //#define ADC_RANGE (bmSingleEnded | bmAdcRange_b1V)
