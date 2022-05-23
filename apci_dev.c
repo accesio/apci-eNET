@@ -502,7 +502,7 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
   ddata = (struct apci_my_info *)dev_id;
 
   // If this is a DMA DONE IRQ then tell the card to write to the next DMA buffer
-  irq_event = ioread32(ddata->regions[1].mapped_address + 0x2C);
+  irq_event = ioread32(ddata->regions[BAR_REGISTER].mapped_address + ofsIrqStatus_Clear);
   if ((irq_event & 0x0000000F) == 0)
   {
     printk("%s NOT ME!\n", __FUNCTION__);
@@ -543,6 +543,7 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
   // clear whatever IRQ occurred and retain enabled IRQ sources
   iowrite32(irq_event, ddata->regions[BAR_REGISTER].mapped_address + ofsIrqStatus_Clear);
   apci_debug("ISR: irq_event = 0x%x, depth = 0x%x, IRQStatus = 0x%x\n", irq_event, ioread32(ddata->regions[1].mapped_address + 0x24), ioread32(ddata->regions[1].mapped_address + 0x2C));
+  irq_event = ioread32(ddata->regions[BAR_REGISTER].mapped_address + ofsIrqStatus_Clear);
 
   /* Check to see if an application is actually waiting for an IRQ. If yes,
    * then we need to wake the queue associated with this device.
@@ -565,7 +566,6 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
     }
   }
   apci_devel("ISR: IRQ Handled\n");
-  udelay(1000);
   return IRQ_HANDLED;
 }
 
