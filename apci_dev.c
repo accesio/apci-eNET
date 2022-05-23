@@ -511,6 +511,9 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
 
   apci_devel("ISR: mPCIe-AxIO irq_event\n");
 
+  iowrite32(irq_event, ddata->regions[BAR_REGISTER].mapped_address + ofsIrqStatus_Clear);
+  apci_debug("ISR: irq_event = 0x%x, depth = 0x%x, IRQStatus = 0x%x\n", irq_event, ioread32(ddata->regions[1].mapped_address + 0x24), ioread32(ddata->regions[1].mapped_address + 0x2C));
+
   if (irq_event & (0x01)) // DMA DONE IRQ, configure next buffer
   {
     dma_addr_t base = ddata->dma_addr;
@@ -538,11 +541,12 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
     iowrite32(base >> 32, ddata->regions[BAR_DMA].mapped_address + ofsDmaAddr64);
     iowrite32(ddata->dma_slot_size, ddata->regions[BAR_DMA].mapped_address + ofsDmaSize);
     iowrite32(DmaStart, ddata->regions[BAR_DMA].mapped_address + ofsDmaControl);
+    udelay(100);
+
   }
 
   // clear whatever IRQ occurred and retain enabled IRQ sources
-  iowrite32(irq_event, ddata->regions[BAR_REGISTER].mapped_address + ofsIrqStatus_Clear);
-  apci_debug("ISR: irq_event = 0x%x, depth = 0x%x, IRQStatus = 0x%x\n", irq_event, ioread32(ddata->regions[1].mapped_address + 0x24), ioread32(ddata->regions[1].mapped_address + 0x2C));
+
 
   /* Check to see if an application is actually waiting for an IRQ. If yes,
    * then we need to wake the queue associated with this device.
@@ -565,7 +569,7 @@ irqreturn_t apci_interrupt(int irq, void *dev_id)
     }
   }
   apci_devel("ISR: IRQ Handled\n");
-  udelay(1000);
+  //udelay(1000);
   return IRQ_HANDLED;
 }
 
