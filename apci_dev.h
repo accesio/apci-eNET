@@ -26,8 +26,34 @@
 #define PCIe_ADIO16_16FDS 0xC2EF
 #define PCIe_ADIO16_16F 0xC2EC
 
+#define eNET_AIO16_16F 0xCFEC
+#define eNET_AIO16_16A 0xCFED
+#define eNET_AIO16_16E 0xCFEE
+#define eNET_AI16_16F 0x8FEC
+#define eNET_AI16_16A 0x8FED
+#define eNET_AI16_16E 0x8FEE
+#define eNET_AIO12_16A 0xCF5C
+#define eNET_AIO12_16 0xCF5D
+#define eNET_AIO12_16E 0xCF5E
+#define eNET_AI12_16A 0x8F5C
+#define eNET_AI12_16 0x8F5D
+#define eNET_AI12_16E 0x8F5E
+
 #define NAME_PCIe_ADIO16_16FDS          "pcie_adio16_16fds"
 #define NAME_PCIe_ADIO16_16F            "pcie_adio16_16f"
+
+#define NAME_eNET_AIO16_16F             "enet_aio16_16f"
+#define NAME_eNET_AIO16_16A             "enet_aio16_16a"
+#define NAME_eNET_AIO16_16E             "enet_aio16_16e"
+#define NAME_eNET_AI16_16F              "enet_ai16_16f"
+#define NAME_eNET_AI16_16A              "enet_ai16_16a"
+#define NAME_eNET_AI16_16E              "enet_ai16_16e"
+#define NAME_eNET_AIO12_16A             "enet_aio12_16a"
+#define NAME_eNET_AIO12_16              "enet_aio12_16"
+#define NAME_eNET_AIO12_16E             "enet_aio12_16e"
+#define NAME_eNET_AI12_16A              "enet_ai12_16a"
+#define NAME_eNET_AI12_16               "enet_ai12_16"
+#define NAME_eNET_AI12_16E              "enet_ai12_16e"
 
 enum ADDRESS_TYPE {INVALID = 0, IO, MEM};
 typedef enum ADDRESS_TYPE address_type;
