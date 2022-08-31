@@ -48,10 +48,7 @@
 /* PCI table construction */
 static struct pci_device_id ids[] = {
     {
-        PCI_DEVICE(A_VENDOR_ID, PCIe_ADIO16_16FDS),
-    },
-    {
-        PCI_DEVICE(A_VENDOR_ID, PCIe_ADIO16_16F),
+        PCI_DEVICE(A_VENDOR_ID, eNET_vC3_FPGA),
     },
     {
         PCI_DEVICE(A_VENDOR_ID, eNET_AIO16_16F),
@@ -144,8 +141,7 @@ int APCI_LOOKUP_ENTRY(int x ) {
 #else
 static struct apci_lookup_table_entry apci_driver_table[] =
     APCI_MAKE_DRIVER_TABLE(
-        APCI_MAKE_ENTRY(PCIe_ADIO16_16FDS),
-        APCI_MAKE_ENTRY(PCIe_ADIO16_16F),
+        APCI_MAKE_ENTRY(eNET_vC3_FPGA),
         APCI_MAKE_ENTRY(eNET_AIO16_16F),
         APCI_MAKE_ENTRY(eNET_AIO16_16A),
         APCI_MAKE_ENTRY(eNET_AIO16_16E),
