@@ -95,6 +95,15 @@ cd sdk-root/
 DESTDIR=buildroot/overlay make install
 cd buildroot/overlay
 mv lib usr
+mkdir -p etc/systemd/system
+mkdir -p etc/modules-load.d
+mkdir opt
+
+```
+```
+Copy image/eNET-AIO-TCPServer.service to buildroot/overlay/etc/systemd/system/
+Copy image/apci.conf to buildroot/overlay/etc/modules-load.d
+Copy the aionetd from the eNET_TCP_SERVER repo to buildroot/opt/
 ```
 
 
