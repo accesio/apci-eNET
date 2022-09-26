@@ -166,11 +166,11 @@ int main(int argc, char **argv)
 	apci_get_device_info(apci, 1, &DeviceID, bar);
 
 	/* Verify the DeviceID is on approved list for this code */
-	if (DeviceID != 0xC2EC)
-	{
-		printf("\nDeviceID %08X is not supported by this utility.\n", DeviceID);
-		exit(1);
-	}
+//	if (DeviceID != 0xC2EC)
+//	{
+//		printf("\nDeviceID %08X is not supported by this utility.\n", DeviceID);
+//		exit(1);
+//	}
 
 	EraseSentinel |= DeviceID;
 	printf("EraseSentinel is %08X\n", EraseSentinel);
