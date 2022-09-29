@@ -11,8 +11,8 @@ check: check.c eNET-AIO.h apcilib.h apcilib.c
 check_dma: check_dma.c eNET-AIO.h apcilib.h apcilib.c
 	$(GCC) -g -o check_dma check_dma.c apcilib.c -lm -lpthread -O3
 
-isp-fpga: isp-fpga.c eNET-AIO.h apcilib.h apcilib.c
-	$(GCC) -o isp-fpga isp-fpga.c apcilib.c -lm
+isp-fpga: isp-fpga.cpp eNET-AIO.h apcilib.h apcilib.c
+	$(GCC) -std=gnu++2a -o isp-fpga isp-fpga.cpp apcilib.c -lm
 
 clean:
 	rm check check_dma isp-fpga logAdcData
