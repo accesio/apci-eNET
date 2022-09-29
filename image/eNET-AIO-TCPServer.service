@@ -1,0 +1,11 @@
+i:/etc/systemd/system$ cat eNET-AIO-TCPServer.service
+[Unit]
+After=network.service
+
+[Service]
+ExecStart=/opt/aionetd 8080
+StandardOutput=tty
+
+[Install]
+WantedBy=default.target
+

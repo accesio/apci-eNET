@@ -27,14 +27,27 @@ drwxrwxr-x  3 jdolan jdolan      4096 Aug 21 19:50 linux-devkit
 ```
 
 ### Patch the Linux kernel
+#### Needed to boot
 This patch https://github.com/accesio/linux/commit/5c7ecc0b095a5c2be28efd8685755df3c11b669d needs to be applied to the kernel. If you are building with 08.00.00.21 you can just check out this commit directly
 
-There is another commit that shows how to integrate the APCI driver into the build. https://github.com/accesio/linux/commit/87c364423b046209a630e935e627da50db8608a7
 ```sh
 sdk-root/board-support/linux-5.10.41+gitAUTOINC+4c2eade9f7-g4c2eade9f7>git remote add aio git@github.com:accesio/linux.git
 sdk-root/board-support/linux-5.10.41+gitAUTOINC+4c2eade9f7-g4c2eade9f7>git fetch aio
 sdk-root/board-support/linux-5.10.41+gitAUTOINC+4c2eade9f7-g4c2eade9f7>git checkout 5c7ecc0b
 ```
+
+#### importing driver to kernel source tree
+The script import-to-kernel-tree.sh will setup a kernel source tree with the current driver source. It takes two parameters
+
+1 (required) Path to the root of th linux source tree
+
+2 (optional) Filename of the kernel config used during build.
+
+Example:
+```sh
+17:01:33:jdolan@work-laptop:~/acces-git/eNET_TCP_Server/apci-eNET/image$./import-to-kernel-tree.sh /home/jdolan/eNET-image/ti-processor-sdk-linux-am64xx-evm-08.00.00.21/board-support/linux-5.10.41+gitAUTOINC+4c2eade9f7-g4c2eade9f7/ /home/jdolan/eNET-image/ti-processor-sdk-linux-am64xx-evm-08.00.00.21/board-support/linux-5.10.41+gitAUTOINC+4c2eade9f7-g4c2eade9f7/arch/arm64/configs/tisdk_am64xx-evm_defconfig
+
+
 
 ### Run the SDK make
 Takes about seventeen minutes on my dev machine
@@ -95,6 +108,15 @@ cd sdk-root/
 DESTDIR=buildroot/overlay make install
 cd buildroot/overlay
 mv lib usr
+mkdir -p etc/systemd/system
+mkdir -p etc/modules-load.d
+mkdir opt
+
+```
+```
+Copy image/eNET-AIO-TCPServer.service to buildroot/overlay/etc/systemd/system/
+Copy image/apci.conf to buildroot/overlay/etc/modules-load.d
+Copy the aionetd from the eNET_TCP_SERVER repo to buildroot/opt/
 ```
 
 
