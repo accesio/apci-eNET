@@ -46,7 +46,14 @@ The script import-to-kernel-tree.sh will setup a kernel source tree with the cur
 Example:
 ```sh
 17:01:33:jdolan@work-laptop:~/acces-git/eNET_TCP_Server/apci-eNET/image$./import-to-kernel-tree.sh /home/jdolan/eNET-image/ti-processor-sdk-linux-am64xx-evm-08.00.00.21/board-support/linux-5.10.41+gitAUTOINC+4c2eade9f7-g4c2eade9f7/ /home/jdolan/eNET-image/ti-processor-sdk-linux-am64xx-evm-08.00.00.21/board-support/linux-5.10.41+gitAUTOINC+4c2eade9f7-g4c2eade9f7/arch/arm64/configs/tisdk_am64xx-evm_defconfig
+```
 
+### patch u-boot
+```sh
+git remote add aio git@github.com:accesio/u-boot.git
+git fetch aio
+git checkout aio-enet
+```
 
 
 ### Run the SDK make
@@ -110,12 +117,17 @@ cd buildroot/overlay
 mv lib usr
 mkdir -p etc/systemd/system
 mkdir -p etc/modules-load.d
-mkdir opt
+mkdir -p opt/aioenet/config.current
+
 
 ```
 ```
 Copy image/eNET-AIO-TCPServer.service to buildroot/overlay/etc/systemd/system/
 Copy image/apci.conf to buildroot/overlay/etc/modules-load.d
+Copy image/DAC_Range.conf opt/aioenet/DAC_RangeCh0.conf
+Copy image/DAC_Range.conf opt/aioenet/DAC_RangeCh1.conf
+Copy image/DAC_Range.conf opt/aioenet/DAC_RangeCh2.conf
+Copy image/DAC_Range.conf opt/aioenet/DAC_RangeCh3.conf
 Copy the aionetd from the eNET_TCP_SERVER repo to buildroot/opt/
 ```
 
@@ -190,4 +202,3 @@ RUN useradd -ms /bin/bash doppel
 USER doppel
 WORKDIR /home/doppel
 ```
-
