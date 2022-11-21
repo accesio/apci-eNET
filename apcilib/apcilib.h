@@ -26,15 +26,6 @@ For more information please contact the ACCES software department at
 int apci_get_devices(int fd);
 
 int apci_get_device_info(int fd, unsigned long device_index, unsigned int *dev_id, unsigned long base_addresses[6]);
-
-int apci_write8(int fd, unsigned long device_index, int bar, int offset, __u8 data);
-int apci_write16(int fd, unsigned long device_index, int bar, int offset, __u16 data);
-int apci_write32(int fd, unsigned long device_index, int bar, int offset, __u32 data);
-
-int apci_read8(int fd, unsigned long device_index, int bar, int offset, __u8 *data);
-int apci_read16(int fd, unsigned long device_index, int bar, int offset, __u16 *data);
-int apci_read32(int fd, unsigned long device_index, int bar, int offset, __u32 *data);
-
 int apci_wait_for_irq(int fd, unsigned long device_index);
 int apci_cancel_irq(int fd, unsigned long device_index);
 
@@ -48,3 +39,12 @@ int apci_writebuf32(int fd, unsigned long device_index, int bar, int bar_offset,
 
 int apci_dac_buffer_size (int fd, unsigned long size);
 int apci_start_dma (int fd);
+
+int apci_write8(int fd, unsigned long device_index, int bar, int offset, __u8 data);
+int apci_write16(int fd, unsigned long device_index, int bar, int offset, __u16 data);
+int apci_write32(int fd, unsigned long device_index, int bar, int offset, __u32 data);
+
+int apci_read8(int fd, unsigned long device_index, int bar, int offset, __u8 *data);
+int apci_read16(int fd, unsigned long device_index, int bar, int offset, __u16 *data);
+int apci_read32(int fd, unsigned long device_index, int bar, int offset, __u32 *data);
+
