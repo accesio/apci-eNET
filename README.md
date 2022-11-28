@@ -159,6 +159,17 @@ sudo tar -xvf buildroot/output/images/rootfs.tar -C /path/to/rootfs
 ```
 
 
+# enabling emmc boot
+
+## copy needed files to sd card. Then boot from sd card
+## copy u-boot files to boot partition
+## fdisk /dev/mmcblk0p1
+```
+/dev/mmcblk1p1       2048 15269887 15267840  7.3G 83 Linux
+```
+## extract rootfs 
+
+
 
 # Building the docker (not complete 2022 08 24)
 ## overview

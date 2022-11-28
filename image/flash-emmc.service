@@ -1,0 +1,9 @@
+[Unit]
+Description=Oneshot service to flash emmc
+
+[Service]
+Type=oneshot
+ExecStart=/opt/emmc-boot-write.sh
+
+[Install]
+WantedBy=default.target
