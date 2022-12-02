@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PHASE=1
+
 led_flash () {
 	echo $1
 	for (( i = 1; i<=$1; i++ ))
@@ -18,8 +20,8 @@ led_set () {
 
 
 echo FLASHING BOOTLOADER
-
-led_flash 1
+led_flash $PHASE
+((PHASE++))
 
 echo 0 > /sys/block/mmcblk0boot0/force_ro
 dd if=/opt/tiboot3.bin of=/dev/mmcblk0boot0 seek=0
@@ -29,8 +31,8 @@ dd if=/opt/u-boot.img of=/dev/mmcblk0boot0 seek=5120
 echo DONE
 
 echo WRITING PARTITION TABLE
-
-led_flash 2
+led_flash $PHASE
+((PHASE++))
 
 sfdisk /dev/mmcblk0 << EOF
 label: dos
@@ -44,9 +46,17 @@ EOF
 
 echo DONE
 
-echo WRITING ROOTFS
+echo SETTING HW RESET ENABLE
+led_flash $PHASE
+((PHASE++))
 
-led_flash 3
+mmc hwreset enable /dev/mmcblk0
+
+echo DONE
+
+echo WRITING ROOTFS
+led_flash $PHASE
+((PHASE++))
 
 mount -t ext4 /dev/mmcblk0p1 /opt/mnt
 
