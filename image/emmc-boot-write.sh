@@ -54,6 +54,27 @@ mmc hwreset enable /dev/mmcblk0
 
 echo DONE
 
+echo SETTING EMMC PARTITION_CONFIG
+led_flash $PHASE
+((PHASE++))
+
+mmc bootpart enable 1 1 /dev/mmcblk0
+echo DONE
+
+echo SETTING EMMC BOOT_BUS_CONDITIONS
+led_flash $PHASE
+((PHASE++))
+
+mmc bootbus set single_backward x1 x8 /dev/mmcblk0
+
+echo DONE
+
+echo CREATING ext4 FILESYSTEM
+led_flash $PHASE
+((PHASE++))
+mkfs.ext4 /dev/mmcblk0p1
+echo DONE
+
 echo WRITING ROOTFS
 led_flash $PHASE
 ((PHASE++))
