@@ -27,8 +27,9 @@ echo 0 > /sys/block/mmcblk0boot0/force_ro
 dd if=/opt/tiboot3.bin of=/dev/mmcblk0boot0 seek=0
 dd if=/opt/tispl.bin of=/dev/mmcblk0boot0 seek=1024
 dd if=/opt/u-boot.img of=/dev/mmcblk0boot0 seek=5120
+[ $? -eq 0 ] && echo DONE || exit
 
-echo DONE
+
 
 echo WRITING PARTITION TABLE
 led_flash $PHASE
@@ -43,47 +44,56 @@ sector-size: 512
 
 /dev/mmcblk0p1 : start=        2048, size=    15267840, type=83
 EOF
+[ $? -eq 0 ] && echo DONE || exit
 
-echo DONE
+
+
 
 echo SETTING HW RESET ENABLE
 led_flash $PHASE
 ((PHASE++))
 
 mmc hwreset enable /dev/mmcblk0
+#Can't check hwreset because it will error out if it's already been set, and
+#we want to be able to reflash emmc
+[ $? -eq 0 ] && echo DONE || echo ALREADY_SET
 
-echo DONE
 
 echo SETTING EMMC PARTITION_CONFIG
 led_flash $PHASE
 ((PHASE++))
 
 mmc bootpart enable 1 1 /dev/mmcblk0
-echo DONE
+[ $? -eq 0 ] && echo DONE || exit
+
 
 echo SETTING EMMC BOOT_BUS_CONDITIONS
 led_flash $PHASE
 ((PHASE++))
 
 mmc bootbus set single_backward x1 x8 /dev/mmcblk0
-
-echo DONE
+[ $? -eq 0 ] && echo DONE || exit
 
 echo CREATING ext4 FILESYSTEM
 led_flash $PHASE
 ((PHASE++))
 mkfs.ext4 /dev/mmcblk0p1
-echo DONE
+[ $? -eq 0 ] && echo DONE || exit
 
 echo WRITING ROOTFS
 led_flash $PHASE
 ((PHASE++))
 
 mount -t ext4 /dev/mmcblk0p1 /opt/mnt
+[ $? -eq 0 ] && echo mounted || exit
+
+
 
 tar -xf /opt/rootfs.tar -C /opt/mnt
-umount /opt/mnt
+[ $? -eq 0 ] && echo written || exit
 
-echo DONE
+
+umount /opt/mnt
+[ $? -eq 0 ] && echo umounted || exit
 
 led_set 1

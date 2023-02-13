@@ -1,0 +1,9 @@
+[Unit]
+Description=aioenetd TCP Protocol 2 Daemon for ACCES eNET-AIO Family
+After=network.target
+
+[Service]
+ExecStart=/opt/aioenet/aioenetd
+
+[Install]
+WantedBy=multi-user.target

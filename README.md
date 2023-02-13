@@ -72,7 +72,7 @@ Need to decompress buildroot, copy config files, setup the overlay and build
 ### Download and decompress buildroot you will be using.
 The place it is decompressed to is ./buildroot/
 ```sh
-20:43:14:jdolan@work-laptop:~/eNET-image/buildroot-2022.05$ls -l
+./buildroot-2022.05$ls -l
 total 928
 drwxrwxr-x    2 jdolan jdolan   4096 Jun  6 13:14 arch
 drwxrwxr-x   76 jdolan jdolan   4096 Jun  6 13:14 board
@@ -117,18 +117,30 @@ cd buildroot/overlay
 mv lib usr
 mkdir -p etc/systemd/system
 mkdir -p etc/modules-load.d
-mkdir -p opt/aioenet/config.current
+mkdir -p etc/aionet.d/config.current
+mkdir -p etc/aionet.d/config.factory
 mkdir -p etc/sudoers.d
+mkdir -p etc/avahi/services
+mkdir -p opt/aionetd
 ```
 ```
-Copy image/eNET-AIO-TCPServer.service to buildroot/overlay/etc/systemd/system/
+Copy image/aioenetd.service to buildroot/overlay/etc/systemd/system/
 Copy image/apci.conf to buildroot/overlay/etc/modules-load.d
-Copy image/DAC_Range.conf opt/aioenet/DAC_RangeCh0.conf
-Copy image/DAC_Range.conf opt/aioenet/DAC_RangeCh1.conf
-Copy image/DAC_Range.conf opt/aioenet/DAC_RangeCh2.conf
-Copy image/DAC_Range.conf opt/aioenet/DAC_RangeCh3.conf
-Copy the aionetd from the eNET_TCP_SERVER repo to buildroot/opt/
+Copy image/DAC_Range.conf etc/aionet.d/config.current/DAC_RangeCh0.conf
+Copy image/DAC_Range.conf etc/aionet.d/config.current/DAC_RangeCh1.conf
+Copy image/DAC_Range.conf etc/aionet.d/config.current/DAC_RangeCh2.conf
+Copy image/DAC_Range.conf etc/aionet.d/config.current/DAC_RangeCh3.conf
+Copy image/DAC_Range.conf etc/aionet.d/config.factory/DAC_RangeCh0.conf
+Copy image/DAC_Range.conf etc/aionet.d/config.factory/DAC_RangeCh1.conf
+Copy image/DAC_Range.conf etc/aionet.d/config.factory/DAC_RangeCh2.conf
+Copy image/DAC_Range.conf etc/aionet.d/config.factory/DAC_RangeCh3.conf
 Copy image/sudoers-acces etc/sudoers.d/acces
+Copy image/aionetd-avahi.service etc/avahi/services/aionetd.service 
+```
+//Note that for S01 you place aionetd.service and aionetd binary in /home/access/ and put a symlink to them in the locations below
+```
+Copy image/aionetd.service etc/systemd/system/
+Copy the aionetd from the eNET_TCP_SERVER repo to buildroot/overlay/opt/aioenet/
 ```
 
 
@@ -164,6 +176,7 @@ sudo tar -xvf buildroot/output/images/rootfs.tar -C /path/to/rootfs
 ## copy needed files to sd card. Then boot from sd card
 ## copy u-boot files to boot partition
 ## fdisk /dev/mmcblk0p1
+## for example commands see [emmc-boot-write.sh](image/emmc-boot-write.sh)
 ```
 /dev/mmcblk1p1       2048 15269887 15267840  7.3G 83 Linux
 ```
