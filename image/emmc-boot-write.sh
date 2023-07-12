@@ -25,8 +25,8 @@ led_flash $PHASE
 
 echo 0 > /sys/block/mmcblk0boot0/force_ro
 dd if=/opt/tiboot3.bin of=/dev/mmcblk0boot0 seek=0
-dd if=/opt/tispl.bin of=/dev/mmcblk0boot0 seek=1024
-dd if=/opt/u-boot.img of=/dev/mmcblk0boot0 seek=5120
+dd if=/opt/tispl.bin of=/dev/mmcblk0boot0 seek=2048
+dd if=/opt/u-boot.img of=/dev/mmcblk0boot0 seek=6144
 [ $? -eq 0 ] && echo DONE || exit
 
 
