@@ -208,7 +208,7 @@ int apci_dma_transfer_size(int fd, unsigned long device_index, __u8 num_slots, s
 int apci_dma_data_ready(int fd, unsigned long device_index, int *start_index, int *slots, int *data_discarded)
 {
 	int status;
-	data_ready_t ready = {0};
+	data_ready_t ready = {0,0,0};
 	status = ioctl(fd, apci_data_ready, &ready);
 
 	*start_index = ready.start_index;
