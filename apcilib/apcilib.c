@@ -146,7 +146,7 @@ int apci_read8(int fd, unsigned long device_index, int bar, int offset, __u8 *da
 
 	status = ioctl(fd, apci_read_ioctl, &io_pack);
 
-	if (data != NULL) *data = io_pack.data;
+	if (data != NULL) *data = static_cast<__u8>(io_pack.data);
 
 	return status;
 
@@ -165,7 +165,7 @@ int apci_read16(int fd, unsigned long device_index, int bar, int offset, __u16 *
 
 	status = ioctl(fd, apci_read_ioctl, &io_pack);
 
-	if (data != NULL) *data = io_pack.data;
+	if (data != NULL) *data = static_cast<__u16>(io_pack.data);
 
 	return status;
 }
