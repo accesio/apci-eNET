@@ -1,19 +1,18 @@
 obj-m += apci.o
-CC		?= gcc
-KDIR            ?= /lib/modules/$(shell uname -r)/build
 
-apci-objs :=      \
-    apci_fops.o   \
+apci-objs :=    \
+	apci_fops.o   \
 	apci_dev.o
 
+
 all:
-	$(MAKE) CC=$(CC) -C $(KDIR) M=$(CURDIR) ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- modules
+	$(MAKE) -C $(KERNEL_SRC) M=$(PWD)
+
+modules_install:
+	$(MAKE) -C $(KERNEL_SRC) M=$(PWD) modules_install
 
 clean:
-	$(MAKE) CC=$(CC) -C $(KDIR) M=$(CURDIR) ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- clean
-
-install:
-	$(MAKE) CC=$(CC) -C $(KDIR) M=$(CURDIR) ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- modules_install
-	depmod -A
-	modprobe -r apci
-	modprobe apci
+	rm -f *.o *~ core .depend .*.cmd *.ko *.mod.c
+	rm -f Module.markers Module.symvers modules.order
+	rm -rf .tmp_versions Modules.symvers
+	
