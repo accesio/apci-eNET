@@ -3,7 +3,7 @@ all: check check_dma isp-fpga logAdcData
 GCC ?= aarch64-none-linux-gnu-gcc
 
 logAdcData: logAdcData.c apcilib.h apcilib.c
-	$(GCC) -o logAdcData logAdcData.c apcilib.c -lm -lpthread -lncurses -lmenu -O3
+	$(GCC) -fpermissive -o logAdcData logAdcData.c apcilib.c -lm -lpthread -lncurses -lmenu -O3
 
 check: check.c eNET-AIO.h apcilib.h apcilib.c
 	$(GCC) -o check check.c apcilib.c -lm -lpthread -O3

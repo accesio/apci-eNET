@@ -506,7 +506,7 @@ int main(int argc, char **argv)
 	if (!bRunLogging)
 	{
 		txtPuts("ESC detected, exiting Logging Sample\n");
-		goto err_out;
+		exit(0);
 	}
 
 	SamplesToLog = (SECONDS_TO_LOG * _AdcStartRate);
