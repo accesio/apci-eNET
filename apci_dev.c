@@ -617,7 +617,7 @@ int probe(struct pci_dev *pdev, const struct pci_device_id *id)
                       ddata);
     if (ret)
     {
-      apci_error("error requesting IRQ %u\n", ddata->irq);
+      apci_error("error requesting IRQ %u. ret = %d\n", ddata->irq, ret);
       ret = -ENOMEM;
       goto exit_free;
     }
@@ -703,7 +703,7 @@ exit_free:
 }
 
 /* Configure the default /dev/{devicename} permissions */
-static char *apci_devnode(struct device *dev, umode_t *mode)
+static char *apci_devnode(const struct device *dev, umode_t *mode)
 {
   if (!mode)
     return NULL;
@@ -731,7 +731,7 @@ apci_init(void)
   }
 
   /* Create the sysfs entry for this */
-  class_apci = class_create(THIS_MODULE, APCI_CLASS_NAME);
+  class_apci = class_create(APCI_CLASS_NAME);
   if (IS_ERR(ptr_err = class_apci))
     goto err;
   class_apci->devnode = apci_devnode; // set device file permissions
