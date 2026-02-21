@@ -585,12 +585,24 @@ int probe(struct pci_dev *pdev, const struct pci_device_id *id)
   struct apci_my_info *_temp;
   struct apci_my_info *child;
   int ret;
+  int irq_mode;
+  int virq;
+
   apci_devel("entering probe\n");
 
   if (pci_enable_device(pdev))
   {
     return -ENODEV;
   }
+
+  irq_mode = pci_alloc_irq_vectors(pdev, 1, 1, PCI_IRQ_ALL_TYPES);  // 1 vector, MSI or MSI-X preferred
+  if (irq_mode < 0) {
+      apci_error("Failed to alloc MSI vectors: %d\n", irq_mode);
+      ret = irq_mode;
+//      goto exit_disable;
+  }
+  apci_debug("Allocated %d IRQ vectors (mode %d)\n", irq_mode, irq_mode == PCI_IRQ_MSI ? "MSI" : "MSI-X");
+
 
   ddata = (struct apci_my_info *)apci_alloc_driver(pdev, id);
   if (ddata == NULL)
@@ -610,11 +622,17 @@ int probe(struct pci_dev *pdev, const struct pci_device_id *id)
   if (ddata->irq_capable)
   {
     apci_debug("Requesting Interrupt, %u\n", (unsigned int)ddata->irq);
-    ret = request_irq((unsigned int)ddata->irq,
-                      apci_interrupt,
-                      IRQF_SHARED,
-                      "apci",
-                      ddata);
+    virq = pci_irq_vector(pdev, 0);  // Get the assigned vector (non-zero)
+    if (ddata->irq_capable) {
+        apci_debug("Requesting MSI IRQ %u\n", virq);
+        ret = devm_request_irq(&pdev->dev, virq, apci_interrupt, 0, "apci", ddata);  // Drop IRQF_SHARED; MSI is exclusive
+        if (ret) {
+            apci_error("MSI IRQ request failed: %d\n", ret);
+//            goto exit_free_irq_vectors;
+        }
+        ddata->irq = virq;  // Store for later use
+    }
+
     if (ret)
     {
       apci_error("error requesting IRQ %u. ret = %d\n", ddata->irq, ret);
