@@ -703,7 +703,7 @@ exit_free:
 }
 
 /* Configure the default /dev/{devicename} permissions */
-static char *apci_devnode(struct device *dev, umode_t *mode)
+static char *apci_devnode(const struct device *dev, umode_t *mode)
 {
   if (!mode)
     return NULL;
@@ -731,7 +731,7 @@ apci_init(void)
   }
 
   /* Create the sysfs entry for this */
-  class_apci = class_create(THIS_MODULE, APCI_CLASS_NAME);
+  class_apci = class_create(APCI_CLASS_NAME);
   if (IS_ERR(ptr_err = class_apci))
     goto err;
   class_apci->devnode = apci_devnode; // set device file permissions
